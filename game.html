@@ -1,39 +1,43 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tendangan Juara - Game</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mulai Game - Tendangan Juara</title>
   <link rel="icon" type="image/png" href="asset/image/logo-soccer-ball.png">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      background-color: #000;
-    }
-    canvas {
-      display: block;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
+  <link rel="stylesheet" href="asset/css/style.css" />
 </head>
-<body class="relative w-screen h-screen overflow-hidden">
+<body class="bg-sky-200 font-fredoka overflow-hidden">
 
-  <!-- Kontrol UI -->
-  <div class="absolute top-4 left-4 z-50 flex gap-2">
-    <button id="btnStart" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg">Start</button>
-    <button id="btnPause" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl shadow-lg">Pause</button>
+  <!-- HUD -->
+  <div class="absolute top-4 left-4 z-10 bg-white/80 px-4 py-2 rounded-xl shadow">
+    <h2 class="font-bold text-xl text-blue-800">Skor: <span id="score">0</span></h2>
   </div>
-  
-  <div class="absolute top-4 right-4 z-50 text-white text-lg font-bold bg-black/50 px-4 py-2 rounded-xl">
-    ⏱️ <span id="timer">60</span> detik
+
+  <!-- Pertanyaan -->
+  <div class="absolute top-4 right-4 z-10 bg-white/90 px-4 py-2 rounded-xl shadow text-center max-w-xs">
+    <p class="text-blue-800 font-semibold">Arahkan bola ke gawang yang bertuliskan: <span class="font-bold">Angka Genap</span></p>
+  </div>
+
+  <!-- Tombol Tendang -->
+  <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-10">
+    <button id="shootBtn" class="bg-green-600 text-white px-6 py-3 rounded-full shadow hover:bg-green-700 transition text-xl font-bold">
+      🥅 Tendang!
+    </button>
+  </div>
+
+  <!-- Tombol Kembali -->
+  <div class="absolute bottom-4 left-4 z-10">
+    <a href="index.html" class="bg-yellow-400 text-blue-900 px-4 py-2 rounded-full shadow hover:bg-yellow-500 font-semibold">
+      ⬅ Kembali
+    </a>
   </div>
 
   <!-- Canvas Three.js -->
-  <canvas id="gameCanvas"></canvas>
+  <canvas id="gameCanvas" class="w-screen h-screen block"></canvas>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-  <script type="module" src="asset/js/game.js"></script>
+  <script src="asset/js/game.js"></script>
 </body>
 </html>
