@@ -15,7 +15,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
-    alpha: true, // Membuat canvas transparan agar background HTML terlihat
+    alpha: true,
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -29,15 +29,61 @@ window.addEventListener("DOMContentLoaded", () => {
   const dirLight = new THREE.DirectionalLight(0xffffff, 1);
   dirLight.position.set(10, 10, 10);
   scene.add(dirLight);
-
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // === Karakter Kartun ===
-  const player = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 2, 1),
-    new THREE.MeshStandardMaterial({ color: 0xffcc00 })
-  );
-  player.position.set(0, 1, 10);
+  // === Fungsi Membuat Karakter Kartun ===
+  function createCartoonPlayer() {
+    const player = new THREE.Group();
+
+    const head = new THREE.Mesh(
+      new THREE.SphereGeometry(0.75, 32, 32),
+      new THREE.MeshStandardMaterial({ color: 0x8d5524 }) // kulit
+    );
+    head.position.set(0, 2.6, 0);
+    player.add(head);
+
+    const hair = new THREE.Mesh(
+      new THREE.SphereGeometry(0.8, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2),
+      new THREE.MeshStandardMaterial({ color: 0x5d3a1a }) // rambut
+    );
+    hair.position.set(0, 2.85, 0);
+    player.add(hair);
+
+    const body = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 1, 0.5),
+      new THREE.MeshStandardMaterial({ color: 0x3498db }) // biru
+    );
+    body.position.set(0, 1.6, 0);
+    player.add(body);
+
+    const shorts = new THREE.Mesh(
+      new THREE.BoxGeometry(1, 0.4, 0.5),
+      new THREE.MeshStandardMaterial({ color: 0xe74c3c }) // merah
+    );
+    shorts.position.set(0, 1.2, 0);
+    player.add(shorts);
+
+    const legMaterial = new THREE.MeshStandardMaterial({ color: 0xffe0bd });
+    const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.6), legMaterial);
+    const rightLeg = leftLeg.clone();
+    leftLeg.position.set(-0.2, 0.6, 0);
+    rightLeg.position.set(0.2, 0.6, 0);
+    player.add(leftLeg);
+    player.add(rightLeg);
+
+    const shoeMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
+    const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.6), shoeMaterial);
+    const rightShoe = leftShoe.clone();
+    leftShoe.position.set(-0.2, 0.2, 0.15);
+    rightShoe.position.set(0.2, 0.2, 0.15);
+    player.add(leftShoe);
+    player.add(rightShoe);
+
+    return player;
+  }
+
+  const player = createCartoonPlayer();
+  player.position.set(0, 0, 10);
   scene.add(player);
 
   // === Bola ===
@@ -63,7 +109,6 @@ window.addEventListener("DOMContentLoaded", () => {
   goal2.position.set(-4, 1, -10);
   scene.add(goal2);
 
-  // Label Gawang
   function createLabel(text, color) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -110,7 +155,10 @@ window.addEventListener("DOMContentLoaded", () => {
     shootBtn.addEventListener("click", () => {
       if (!isKicked) {
         isKicked = true;
-        velocity.set(0, 0.1, -0.4); // arah tendangan
+        velocity.set(0, 0.1, -0.4);
+        // animasi pemain saat menendang
+        player.rotation.y = 0;
+        player.rotation.x = -0.3;
       }
     });
   }
@@ -121,7 +169,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!isKicked) {
       ball.position.x += moveDir * 0.1;
+      player.position.x += moveDir * 0.1;
       ball.position.x = THREE.MathUtils.clamp(ball.position.x, -5, 5);
+      player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
     } else {
       ball.position.add(velocity);
       velocity.y -= 0.008; // gravitasi
