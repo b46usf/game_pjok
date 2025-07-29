@@ -7,36 +7,75 @@
   <link rel="icon" type="image/png" href="asset/image/logo-soccer-ball.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-  <link rel="stylesheet" href="asset/css/style.css" />
+  <!-- <link rel="stylesheet" href="asset/css/style.css" /> -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    /* Responsif khusus mode potret (portrait) */
+    @media (orientation: portrait) {
+      .landscape-only {
+        display: none;
+      }
+      .portrait-warning {
+        display: block;
+      }
+    }
+
+    /* Mode landscape */
+    @media (orientation: landscape) {
+      .portrait-warning {
+        display: none;
+      }
+    }
+  </style>
 </head>
-<body class="bg-sky-200 font-fredoka overflow-hidden">
+<body class="bg-sky-200 font-fredoka relative">
+
+  <!-- Peringatan jika tidak landscape -->
+  <div class="portrait-warning fixed inset-0 z-50 flex items-center justify-center bg-white text-center px-6">
+    <div class="text-blue-800">
+      <h2 class="text-2xl font-bold mb-2">Putar perangkatmu!</h2>
+      <p class="text-lg">Game ini lebih seru dimainkan dalam mode <strong>landscape</strong> (horizontal) 📱🔄</p>
+    </div>
+  </div>
 
   <!-- HUD -->
-  <div class="absolute top-4 left-4 z-10 bg-white/80 px-4 py-2 rounded-xl shadow">
+  <div class="landscape-only absolute top-4 left-4 z-10 bg-white/80 px-4 py-2 rounded-xl shadow max-w-[90vw]">
     <h2 class="font-bold text-xl text-blue-800">Skor: <span id="score">0</span></h2>
   </div>
 
   <!-- Pertanyaan -->
-  <div class="absolute top-4 right-4 z-10 bg-white/90 px-4 py-2 rounded-xl shadow text-center max-w-xs">
+  <div class="landscape-only absolute top-4 right-4 z-10 bg-white/90 px-4 py-2 rounded-xl shadow text-center max-w-[90vw] sm:max-w-xs">
     <p class="text-blue-800 font-semibold">Arahkan bola ke gawang yang bertuliskan: <span class="font-bold">Angka Genap</span></p>
   </div>
 
   <!-- Tombol Tendang -->
-  <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-10">
+  <div class="landscape-only absolute bottom-24 left-1/2 transform -translate-x-1/2 z-10">
     <button id="shootBtn" class="bg-green-600 text-white px-6 py-3 rounded-full shadow hover:bg-green-700 transition text-xl font-bold">
       🥅 Tendang!
     </button>
   </div>
 
   <!-- Tombol Kembali -->
-  <div class="absolute bottom-4 left-4 z-10">
+  <div class="landscape-only absolute bottom-4 left-4 z-10">
     <a href="index.html" class="bg-yellow-400 text-blue-900 px-4 py-2 rounded-full shadow hover:bg-yellow-500 font-semibold">
       ⬅ Kembali
     </a>
   </div>
 
   <!-- Canvas Three.js -->
-  <canvas id="gameCanvas" class="w-screen h-screen block"></canvas>
+  <canvas id="gameCanvas" class="absolute inset-0"></canvas>
 
   <script src="asset/js/game.js"></script>
 </body>
