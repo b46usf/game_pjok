@@ -8,8 +8,8 @@ window.addEventListener("DOMContentLoaded", () => {
     0.1,
     1000
   );
-  camera.position.set(0, 3.5, 10);  // Posisi kamera
-  camera.lookAt(0, 1.8, 0);         // Fokus ke tengah tubuh pemain
+  camera.position.set(0, 3.5, 10);  // Posisi kamera dari atas menghadap ke depan
+  camera.lookAt(0, 1.8, 0);         // Fokus ke tengah pemain
 
   const canvas = document.getElementById("gameCanvas");
   const renderer = new THREE.WebGLRenderer({
@@ -31,7 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(dirLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // === Sprite Karakter 2D ===
+  // === Sprite Karakter 2D (Langsung Hadap Depan, Proporsional) ===
   let player;
 
   const loader = new THREE.TextureLoader();
@@ -40,20 +40,14 @@ window.addEventListener("DOMContentLoaded", () => {
     (texture) => {
       console.log("✅ Gambar berhasil dimuat");
 
-      // Atur orientasi membelakangi kamera
-      texture.flipY = false;
-      texture.repeat.x = -1;
-      texture.offset.x = 1;
-      texture.center.set(0.5, 0.5);
-
       const material = new THREE.SpriteMaterial({
         map: texture,
         transparent: true,
       });
 
       player = new THREE.Sprite(material);
-      player.scale.set(1.2, 2.4, 1); // Sesuaikan ukuran karakter
-      player.position.set(0, 1.2, 10); // Disesuaikan agar kaki pas di tanah
+      player.scale.set(1.2, 2.4, 1);       // Tinggi & lebar karakter
+      player.position.set(0, 1.2, 8);      // Disesuaikan agar kaki pas di tanah
       scene.add(player);
     },
     undefined,
@@ -112,7 +106,7 @@ window.addEventListener("DOMContentLoaded", () => {
   label4.position.set(-4, 2.5, -9.6);
   scene.add(label4);
 
-  // === Kontrol Keyboard (Gerakkan bola & player sebelum ditendang) ===
+  // === Kontrol Keyboard (Gerak horizontal sebelum ditendang) ===
   let moveDir = 0;
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
@@ -132,7 +126,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!isKicked && player) {
         isKicked = true;
         velocity.set(0, 0.1, -0.4);
-        player.scale.y = 2.2;
+        player.scale.y = 2.2;  // animasi kecil: menunduk
         setTimeout(() => player.scale.y = 2.4, 100);
       }
     });
