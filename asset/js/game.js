@@ -8,8 +8,8 @@ window.addEventListener("DOMContentLoaded", () => {
     0.1,
     1000
   );
-  camera.position.set(0, 3.5, 10);  // Lebih tinggi agar full-body terlihat
-  camera.lookAt(0, 2, 0);           // Fokus ke tengah tubuh pemain
+  camera.position.set(0, 3.5, 10);  // Naikkan kamera agar seluruh tubuh terlihat
+  camera.lookAt(0, 1.8, 0);         // Fokus ke tengah tubuh pemain
 
   const canvas = document.getElementById("gameCanvas");
   const renderer = new THREE.WebGLRenderer({
@@ -31,25 +31,25 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(dirLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // === Fungsi Membuat Sprite Karakter 2D dari Gambar ===
+  // === Sprite Karakter 2D ===
   function createCartoonPlayer() {
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load("/asset/image/player.png"); // Pastikan file player.png tersedia
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load("asset/image/player.png");
     texture.flipY = false;
 
-    // Jika ingin membelakangi kamera, mirror horizontal
+    // Membelakangi kamera
     texture.repeat.x = -1;
     texture.offset.x = 1;
 
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
     const sprite = new THREE.Sprite(material);
-    sprite.scale.set(2, 4, 1); // Lebar, tinggi, depth semu
 
+    sprite.scale.set(1.2, 2.4, 1); // Lebar 1.2, tinggi 2.4
     return sprite;
   }
 
   const player = createCartoonPlayer();
-  player.position.set(0, 2, 10); // Posisi agar sejajar kaki di bawah dan kamera lihat dari belakang
+  player.position.set(0, 1.2, 10); // Kaki di bawah y = 0
   scene.add(player);
 
   // === Bola ===
@@ -122,9 +122,9 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!isKicked) {
         isKicked = true;
         velocity.set(0, 0.1, -0.4);
-        // bisa tambahkan scaling animasi jika mau "tendang"
-        player.scale.y = 3.8; // pendek sebentar
-        setTimeout(() => player.scale.y = 4, 100);
+        // Animasi tendang (skala sementara)
+        player.scale.y = 2.2;
+        setTimeout(() => player.scale.y = 2.4, 100);
       }
     });
   }
