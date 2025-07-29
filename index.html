@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tendangan Juara</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            fredoka: ['Fredoka', 'sans-serif']
+          },
+          animation: {
+            'bounce-slow': 'bounce 2s infinite',
+            'fade-in': 'fadeIn 1s ease-out forwards'
+          },
+          keyframes: {
+            fadeIn: {
+              '0%': { opacity: 0, transform: 'translateY(10px)' },
+              '100%': { opacity: 1, transform: 'translateY(0)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500&display=swap" rel="stylesheet">
+
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="asset/image/logo-soccer-ball.png">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="asset/css/style.css" />
+
+  <!-- Audio Preload -->
+  <audio id="bg-music" src="asset/audio/bg-music.mp3" loop preload="auto"></audio>
+  <audio id="click-sound" src="asset/audio/click.mp3" preload="auto"></audio>
+</head>
+<body class="game-body">
+
+  <!-- Header -->
+  <header class="flex justify-center mt-4 animate__animated animate__fadeInDown">
+    <div class="bg-transparent px-4 py-2 rounded-xl">
+      <img src="asset/image/logo-soccer-ball.png" alt="Logo Tendangan Juara" class="w-48 drop-shadow-lg animate-bounce-slow" />
+    </div>
+  </header>
+
+  <!-- Tombol Musik -->
+  <div class="mt-4">
+    <button id="music-toggle" class="music-btn">🔇 Musik: Mati</button>
+  </div>
+
+  <!-- Main Buttons -->
+  <main class="main-buttons">
+    <button class="game-button bg-blue-700 hover:bg-blue-800">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="currentColor" viewBox="0 0 24 24"><path d="M5 3.868v16.264c0 .65.703 1.043 1.26.7l12.487-8.132a.816.816 0 0 0 0-1.332L6.26 3.236C5.703 2.893 5 3.287 5 3.868z"/></svg>
+      <span>Mulai Game</span>
+    </button>
+
+    <button class="game-button bg-yellow-500 hover:bg-yellow-600">
+      <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 8h10M7 12h6m-6 4h10M4 6h16a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2z"/></svg>
+      <span>Quiz</span>
+    </button>
+
+    <div class="sm:col-span-2">
+      <button class="game-button bg-green-600 hover:bg-green-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-2 13.732V22l4-2 4 2v-6.268A7 7 0 0 0 12 2z"/></svg>
+        <span>Lencana</span>
+      </button>
+    </div>
+  </main>
+
+  <!-- Deskripsi -->
+  <section class="description-box">
+    Latih teknik menendang bola dengan menyenangkan sambil belajar PJOK secara interaktif!
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer-links">
+    <a href="#">Kontak</a>
+    <a href="#">Info Guru</a>
+    <a href="#">Credits</a>
+  </footer>
+
+  <!-- Script -->
+  <script src="asset/js/script.js"></script>
+</body>
+</html>

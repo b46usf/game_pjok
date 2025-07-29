@@ -1,0 +1,96 @@
+body {
+  font-family: 'Fredoka', sans-serif;
+}
+
+.game-body {
+  min-height: 100vh;
+  background-image: url('../image/bg-ball-game.png');
+  background-size: cover;
+  background-position: bottom;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.main-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 20rem;
+}
+
+@media (min-width: 640px) {
+  .main-buttons {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 48rem;
+  }
+}
+
+.game-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  color: white;
+  font-size: 1.125rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+  width: 100%;
+}
+
+.game-button:hover {
+  transform: scale(1.05);
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.description-box {
+  background-color: #fef3c7;
+  color: #1e3a8a;
+  margin-top: 2rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+  max-width: 28rem;
+  width: 100%;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+  color: #1e3a8a;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.music-btn {
+  background: white;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+  padding: 0.5rem 1.25rem;
+  border-radius: 9999px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: background 0.2s;
+}
+.music-btn:hover {
+  background: #eff6ff;
+}

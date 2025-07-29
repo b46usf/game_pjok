@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tendangan Juara - Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="icon" type="image/png" href="asset/image/logo-soccer-ball.png">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body class="relative w-screen h-screen overflow-hidden">
+
+  <!-- Kontrol UI -->
+  <div class="absolute top-4 left-4 z-50 flex gap-2">
+    <button id="btnStart" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-lg">Start</button>
+    <button id="btnPause" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl shadow-lg">Pause</button>
+  </div>
+  
+  <div class="absolute top-4 right-4 z-50 text-white text-lg font-bold bg-black/50 px-4 py-2 rounded-xl">
+    ⏱️ <span id="timer">60</span> detik
+  </div>
+
+  <!-- Canvas Three.js -->
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script> -->
+  <script type="module" src="asset/js/game.js"></script>
+</body>
+</html>
