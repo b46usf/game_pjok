@@ -34,7 +34,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // === Fungsi Membuat Sprite Karakter 2D dari Gambar ===
   function createCartoonPlayer() {
     const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load("../images/player.png"); // Pastikan file player.png tersedia
+    const texture = textureLoader.load("/asset/image/player.png"); // Pastikan file player.png tersedia
     texture.flipY = false;
 
     // Jika ingin membelakangi kamera, mirror horizontal
