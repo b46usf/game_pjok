@@ -13,6 +13,8 @@
       padding: 0;
       height: 100%;
       overflow: hidden;
+      background: url('asset/image/background-field.png') no-repeat center center;
+      background-size: cover;
     }
 
     canvas {
@@ -22,12 +24,10 @@
       left: 0;
     }
 
-    /* Sembunyikan warning secara default */
     .portrait-warning {
       display: none;
     }
 
-    /* Tampilkan hanya saat portrait */
     @media (orientation: portrait) {
       .landscape-only {
         display: none;
@@ -73,7 +73,7 @@
   </div>
 
   <!-- Canvas Three.js -->
-  <canvas id="gameCanvas" class="absolute inset-0 z-0"></canvas>
+  <!-- <canvas id="gameCanvas" class="absolute inset-0 z-0"></canvas> -->
 
   <script src="asset/js/game.js"></script>
 </body>
