@@ -8,7 +8,7 @@ window.addEventListener("DOMContentLoaded", () => {
     0.1,
     1000
   );
-  camera.position.set(0, 3.5, 10);  // Naikkan kamera agar seluruh tubuh terlihat
+  camera.position.set(0, 3.5, 10);  // Posisi kamera
   camera.lookAt(0, 1.8, 0);         // Fokus ke tengah tubuh pemain
 
   const canvas = document.getElementById("gameCanvas");
@@ -32,34 +32,35 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
   // === Sprite Karakter 2D ===
-  function createCartoonPlayer() {
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(
-      "asset/image/player.png",
-      () => {
-        console.log("✅ Gambar berhasil dimuat.");
-      },
-      undefined,
-      (err) => {
-        console.error("❌ Gagal memuat gambar:", err);
-      }
-    );
-    texture.flipY = false;
+  let player;
 
-    // Membelakangi kamera
-    texture.repeat.x = -1;
-    texture.offset.x = 1;
+  const loader = new THREE.TextureLoader();
+  loader.load(
+    "asset/image/player.png",
+    (texture) => {
+      console.log("✅ Gambar berhasil dimuat");
 
-    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-    const sprite = new THREE.Sprite(material);
+      // Atur orientasi membelakangi kamera
+      texture.flipY = false;
+      texture.repeat.x = -1;
+      texture.offset.x = 1;
+      texture.center.set(0.5, 0.5);
 
-    sprite.scale.set(1.2, 2.4, 1); // Lebar 1.2, tinggi 2.4
-    return sprite;
-  }
+      const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+      });
 
-  const player = createCartoonPlayer();
-  player.position.set(0, 1.2, 10); // Kaki di bawah y = 0
-  scene.add(player);
+      player = new THREE.Sprite(material);
+      player.scale.set(1.2, 2.4, 1); // Sesuaikan ukuran karakter
+      player.position.set(0, 1.2, 10); // Disesuaikan agar kaki pas di tanah
+      scene.add(player);
+    },
+    undefined,
+    (error) => {
+      console.error("❌ Gagal memuat gambar:", error);
+    }
+  );
 
   // === Bola ===
   const ball = new THREE.Mesh(
@@ -111,7 +112,7 @@ window.addEventListener("DOMContentLoaded", () => {
   label4.position.set(-4, 2.5, -9.6);
   scene.add(label4);
 
-  // === Kontrol Keyboard (Gerakkan bola sebelum ditendang) ===
+  // === Kontrol Keyboard (Gerakkan bola & player sebelum ditendang) ===
   let moveDir = 0;
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
@@ -128,10 +129,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const shootBtn = document.getElementById("shootBtn");
   if (shootBtn) {
     shootBtn.addEventListener("click", () => {
-      if (!isKicked) {
+      if (!isKicked && player) {
         isKicked = true;
         velocity.set(0, 0.1, -0.4);
-        // Animasi tendang (skala sementara)
         player.scale.y = 2.2;
         setTimeout(() => player.scale.y = 2.4, 100);
       }
@@ -144,9 +144,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!isKicked) {
       ball.position.x += moveDir * 0.1;
-      player.position.x += moveDir * 0.1;
+      if (player) player.position.x += moveDir * 0.1;
+
       ball.position.x = THREE.MathUtils.clamp(ball.position.x, -5, 5);
-      player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
+      if (player) player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
     } else {
       ball.position.add(velocity);
       velocity.y -= 0.008;
