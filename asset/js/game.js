@@ -8,8 +8,8 @@ window.addEventListener("DOMContentLoaded", () => {
     0.1,
     1000
   );
-  camera.position.set(0, 5, 10);
-  camera.lookAt(0, 1, 0);
+  camera.position.set(0, 2.5, 10);
+  camera.lookAt(0, 1.2, 0);
 
   const canvas = document.getElementById("gameCanvas");
   const renderer = new THREE.WebGLRenderer({
@@ -83,7 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const player = createCartoonPlayer();
-  player.position.set(0, 0, 10);
+  player.position.set(0, 0.2, 10);
   scene.add(player);
 
   // === Bola ===
