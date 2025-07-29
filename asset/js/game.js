@@ -33,8 +33,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // === Sprite Karakter 2D ===
   function createCartoonPlayer() {
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load("/asset/image/player.png");
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load(
+      "asset/image/player.png",
+      () => {
+        console.log("✅ Gambar berhasil dimuat.");
+      },
+      undefined,
+      (err) => {
+        console.error("❌ Gagal memuat gambar:", err);
+      }
+    );
     texture.flipY = false;
 
     // Membelakangi kamera
