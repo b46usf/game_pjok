@@ -7,7 +7,6 @@
   <link rel="icon" type="image/png" href="asset/image/logo-soccer-ball.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
-  <!-- <link rel="stylesheet" href="asset/css/style.css" /> -->
   <style>
     html, body {
       margin: 0;
@@ -22,20 +21,18 @@
       height: 100vh;
     }
 
-    /* Responsif khusus mode potret (portrait) */
+    /* Sembunyikan warning secara default */
+    .portrait-warning {
+      display: none;
+    }
+
+    /* Tampilkan hanya saat portrait */
     @media (orientation: portrait) {
       .landscape-only {
         display: none;
       }
       .portrait-warning {
-        display: block;
-      }
-    }
-
-    /* Mode landscape */
-    @media (orientation: landscape) {
-      .portrait-warning {
-        display: none;
+        display: flex;
       }
     }
   </style>
@@ -43,7 +40,7 @@
 <body class="bg-sky-200 font-fredoka relative">
 
   <!-- Peringatan jika tidak landscape -->
-  <div class="portrait-warning fixed inset-0 z-50 flex items-center justify-center bg-white text-center px-6">
+  <div class="portrait-warning fixed inset-0 z-50 items-center justify-center bg-white text-center px-6">
     <div class="text-blue-800">
       <h2 class="text-2xl font-bold mb-2">Putar perangkatmu!</h2>
       <p class="text-lg">Game ini lebih seru dimainkan dalam mode <strong>landscape</strong> (horizontal) 📱🔄</p>
