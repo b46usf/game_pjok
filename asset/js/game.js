@@ -8,8 +8,8 @@ window.addEventListener("DOMContentLoaded", () => {
     0.1,
     1000
   );
-  camera.position.set(0, 3.5, 10);  // Posisi kamera dari atas menghadap ke depan
-  camera.lookAt(0, 1.8, 0);         // Fokus ke tengah pemain
+  camera.position.set(0, 2.8, 12);  // 📌 Mundur dan agak rendah
+  camera.lookAt(0, 1.6, 0);         // 📌 Fokus ke tengah badan pemain
 
   const canvas = document.getElementById("gameCanvas");
   const renderer = new THREE.WebGLRenderer({
@@ -31,7 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(dirLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // === Sprite Karakter 2D (Langsung Hadap Depan, Proporsional) ===
+  // === Sprite Karakter 2D ===
   let player;
 
   const loader = new THREE.TextureLoader();
@@ -46,8 +46,8 @@ window.addEventListener("DOMContentLoaded", () => {
       });
 
       player = new THREE.Sprite(material);
-      player.scale.set(1.2, 2.4, 1);       // Tinggi & lebar karakter
-      player.position.set(0, 1.2, 8);      // Disesuaikan agar kaki pas di tanah
+      player.scale.set(1.5, 3, 1);         // 📌 Ukuran tubuh full
+      player.position.set(0, 1.5, 8);      // 📌 Pasin kaki ke bawah
       scene.add(player);
     },
     undefined,
@@ -126,8 +126,8 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!isKicked && player) {
         isKicked = true;
         velocity.set(0, 0.1, -0.4);
-        player.scale.y = 2.2;  // animasi kecil: menunduk
-        setTimeout(() => player.scale.y = 2.4, 100);
+        player.scale.y = 2.8; // animasi kecil
+        setTimeout(() => player.scale.y = 3, 100);
       }
     });
   }
