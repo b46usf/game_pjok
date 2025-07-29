@@ -1,9 +1,6 @@
-// import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
-
 window.addEventListener("DOMContentLoaded", () => {
   // === Scene Setup ===
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x87ceeb); // Sky blue
 
   const camera = new THREE.PerspectiveCamera(
     75,
@@ -18,6 +15,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
+    alpha: true, // Membuat canvas transparan agar background HTML terlihat
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -33,76 +31,6 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(dirLight);
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-
-  // === Lapangan (Grass) ===
-  const grass = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 30),
-    new THREE.MeshLambertMaterial({ color: 0x4caf50 })
-  );
-  grass.rotation.x = -Math.PI / 2;
-  scene.add(grass);
-
-  // Garis Tengah
-  const midLine = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.1, 10),
-    new THREE.MeshBasicMaterial({ color: 0xffffff })
-  );
-  midLine.rotation.x = -Math.PI / 2;
-  midLine.position.y = 0.01;
-  scene.add(midLine);
-
-  // Lingkaran Tengah
-  const ring = new THREE.RingGeometry(3.5, 3.55, 64);
-  const ringMat = new THREE.MeshBasicMaterial({
-    color: 0xffffff,
-    side: THREE.DoubleSide,
-  });
-  const ringMesh = new THREE.Mesh(ring, ringMat);
-  ringMesh.rotation.x = -Math.PI / 2;
-  ringMesh.position.y = 0.02;
-  scene.add(ringMesh);
-
-  // === Awan Kartun ===
-  function createCloud(x, y, z) {
-    const cloud = new THREE.Group();
-    const geo = new THREE.SphereGeometry(1.5, 16, 16);
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-
-    for (let i = 0; i < 3; i++) {
-      const puff = new THREE.Mesh(geo, mat);
-      puff.position.x = i * 1.2;
-      cloud.add(puff);
-    }
-
-    cloud.position.set(x, y, z);
-    scene.add(cloud);
-  }
-
-  createCloud(-5, 7, -5);
-  createCloud(5, 6, -6);
-  createCloud(0, 6.5, -8);
-
-  // === Pohon ===
-  function createTree(x, z) {
-    const trunk = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.2, 0.2, 1),
-      new THREE.MeshStandardMaterial({ color: 0x8b5a2b })
-    );
-    trunk.position.set(x, 0.5, z);
-
-    const crown = new THREE.Mesh(
-      new THREE.SphereGeometry(0.8, 16, 16),
-      new THREE.MeshStandardMaterial({ color: 0x2ecc71 })
-    );
-    crown.position.set(x, 1.6, z);
-
-    scene.add(trunk);
-    scene.add(crown);
-  }
-
-  for (let i = -10; i <= 10; i += 2) {
-    createTree(i, -14);
-  }
 
   // === Karakter Kartun ===
   const player = new THREE.Mesh(
