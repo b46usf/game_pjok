@@ -14,11 +14,13 @@ window.addEventListener("DOMContentLoaded", () => {
   camera.position.set(0, 5, 10);
   camera.lookAt(0, 1, 0);
 
+  const canvas = document.getElementById("gameCanvas");
   const renderer = new THREE.WebGLRenderer({
-    canvas: document.getElementById("gameCanvas"),
+    canvas: canvas,
     antialias: true,
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
+
   window.addEventListener("resize", () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -26,10 +28,13 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   // === Lighting ===
-  scene.add(new THREE.DirectionalLight(0xffffff, 1).position.set(10, 10, 10));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+  dirLight.position.set(10, 10, 10);
+  scene.add(dirLight);
+
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // === Lapangan ===
+  // === Lapangan (Grass) ===
   const grass = new THREE.Mesh(
     new THREE.PlaneGeometry(20, 30),
     new THREE.MeshLambertMaterial({ color: 0x4caf50 })
@@ -37,18 +42,21 @@ window.addEventListener("DOMContentLoaded", () => {
   grass.rotation.x = -Math.PI / 2;
   scene.add(grass);
 
-  // Garis tengah
+  // Garis Tengah
   const midLine = new THREE.Mesh(
     new THREE.PlaneGeometry(0.1, 10),
     new THREE.MeshBasicMaterial({ color: 0xffffff })
   );
   midLine.rotation.x = -Math.PI / 2;
-  midLine.position.set(0, 0.01, 0);
+  midLine.position.y = 0.01;
   scene.add(midLine);
 
-  // Lingkaran tengah
+  // Lingkaran Tengah
   const ring = new THREE.RingGeometry(3.5, 3.55, 64);
-  const ringMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff,
+    side: THREE.DoubleSide,
+  });
   const ringMesh = new THREE.Mesh(ring, ringMat);
   ringMesh.rotation.x = -Math.PI / 2;
   ringMesh.position.y = 0.02;
@@ -59,11 +67,13 @@ window.addEventListener("DOMContentLoaded", () => {
     const cloud = new THREE.Group();
     const geo = new THREE.SphereGeometry(1.5, 16, 16);
     const mat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+
     for (let i = 0; i < 3; i++) {
       const puff = new THREE.Mesh(geo, mat);
       puff.position.x = i * 1.2;
       cloud.add(puff);
     }
+
     cloud.position.set(x, y, z);
     scene.add(cloud);
   }
@@ -72,7 +82,7 @@ window.addEventListener("DOMContentLoaded", () => {
   createCloud(5, 6, -6);
   createCloud(0, 6.5, -8);
 
-  // === Pohon Sederhana ===
+  // === Pohon ===
   function createTree(x, z) {
     const trunk = new THREE.Mesh(
       new THREE.CylinderGeometry(0.2, 0.2, 1),
@@ -125,6 +135,7 @@ window.addEventListener("DOMContentLoaded", () => {
   goal2.position.set(-4, 1, -10);
   scene.add(goal2);
 
+  // Label Gawang
   function createLabel(text, color) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -152,7 +163,7 @@ window.addEventListener("DOMContentLoaded", () => {
   label4.position.set(-4, 2.5, -9.6);
   scene.add(label4);
 
-  // === Kontrol Keyboard ===
+  // === Kontrol Keyboard (Gerakkan bola sebelum ditendang) ===
   let moveDir = 0;
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
@@ -162,16 +173,19 @@ window.addEventListener("DOMContentLoaded", () => {
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") moveDir = 0;
   });
 
-  // === Bola Movement ===
+  // === Tembakan Bola ===
   let isKicked = false;
   let velocity = new THREE.Vector3();
 
-  document.getElementById("shootBtn").addEventListener("click", () => {
-    if (!isKicked) {
-      isKicked = true;
-      velocity.set(0, 0.1, -0.4);
-    }
-  });
+  const shootBtn = document.getElementById("shootBtn");
+  if (shootBtn) {
+    shootBtn.addEventListener("click", () => {
+      if (!isKicked) {
+        isKicked = true;
+        velocity.set(0, 0.1, -0.4); // arah tendangan
+      }
+    });
+  }
 
   // === Game Loop ===
   function animate() {
@@ -182,7 +196,7 @@ window.addEventListener("DOMContentLoaded", () => {
       ball.position.x = THREE.MathUtils.clamp(ball.position.x, -5, 5);
     } else {
       ball.position.add(velocity);
-      velocity.y -= 0.008;
+      velocity.y -= 0.008; // gravitasi
     }
 
     renderer.render(scene, camera);
