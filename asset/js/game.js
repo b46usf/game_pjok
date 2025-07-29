@@ -83,7 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const player = createCartoonPlayer();
-  player.position.set(0, 0.2, 10);
+  player.position.set(0, 0, 10);
   scene.add(player);
 
   // === Bola ===
