@@ -8,8 +8,8 @@ window.addEventListener("DOMContentLoaded", () => {
     0.1,
     1000
   );
-  camera.position.set(0, 2.5, 10);
-  camera.lookAt(0, 1.2, 0);
+  camera.position.set(0, 3.5, 10);  // Lebih tinggi agar full-body terlihat
+  camera.lookAt(0, 2, 0);           // Fokus ke tengah tubuh pemain
 
   const canvas = document.getElementById("gameCanvas");
   const renderer = new THREE.WebGLRenderer({
@@ -31,59 +31,25 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(dirLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // === Fungsi Membuat Karakter Kartun ===
+  // === Fungsi Membuat Sprite Karakter 2D dari Gambar ===
   function createCartoonPlayer() {
-    const player = new THREE.Group();
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load("../images/player.png"); // Pastikan file player.png tersedia
+    texture.flipY = false;
 
-    const head = new THREE.Mesh(
-      new THREE.SphereGeometry(0.75, 32, 32),
-      new THREE.MeshStandardMaterial({ color: 0x8d5524 }) // kulit
-    );
-    head.position.set(0, 2.6, 0);
-    player.add(head);
+    // Jika ingin membelakangi kamera, mirror horizontal
+    texture.repeat.x = -1;
+    texture.offset.x = 1;
 
-    const hair = new THREE.Mesh(
-      new THREE.SphereGeometry(0.8, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2),
-      new THREE.MeshStandardMaterial({ color: 0x5d3a1a }) // rambut
-    );
-    hair.position.set(0, 2.85, 0);
-    player.add(hair);
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+    sprite.scale.set(2, 4, 1); // Lebar, tinggi, depth semu
 
-    const body = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 0.5),
-      new THREE.MeshStandardMaterial({ color: 0x3498db }) // biru
-    );
-    body.position.set(0, 1.6, 0);
-    player.add(body);
-
-    const shorts = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 0.4, 0.5),
-      new THREE.MeshStandardMaterial({ color: 0xe74c3c }) // merah
-    );
-    shorts.position.set(0, 1.2, 0);
-    player.add(shorts);
-
-    const legMaterial = new THREE.MeshStandardMaterial({ color: 0xffe0bd });
-    const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.6), legMaterial);
-    const rightLeg = leftLeg.clone();
-    leftLeg.position.set(-0.2, 0.6, 0);
-    rightLeg.position.set(0.2, 0.6, 0);
-    player.add(leftLeg);
-    player.add(rightLeg);
-
-    const shoeMaterial = new THREE.MeshStandardMaterial({ color: 0x2c3e50 });
-    const leftShoe = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.2, 0.6), shoeMaterial);
-    const rightShoe = leftShoe.clone();
-    leftShoe.position.set(-0.2, 0.2, 0.15);
-    rightShoe.position.set(0.2, 0.2, 0.15);
-    player.add(leftShoe);
-    player.add(rightShoe);
-
-    return player;
+    return sprite;
   }
 
   const player = createCartoonPlayer();
-  player.position.set(0, 0, 10);
+  player.position.set(0, 2, 10); // Posisi agar sejajar kaki di bawah dan kamera lihat dari belakang
   scene.add(player);
 
   // === Bola ===
@@ -156,9 +122,9 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!isKicked) {
         isKicked = true;
         velocity.set(0, 0.1, -0.4);
-        // animasi pemain saat menendang
-        player.rotation.y = 0;
-        player.rotation.x = -0.3;
+        // bisa tambahkan scaling animasi jika mau "tendang"
+        player.scale.y = 3.8; // pendek sebentar
+        setTimeout(() => player.scale.y = 4, 100);
       }
     });
   }
@@ -174,7 +140,7 @@ window.addEventListener("DOMContentLoaded", () => {
       player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
     } else {
       ball.position.add(velocity);
-      velocity.y -= 0.008; // gravitasi
+      velocity.y -= 0.008;
     }
 
     renderer.render(scene, camera);
