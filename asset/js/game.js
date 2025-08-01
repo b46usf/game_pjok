@@ -119,7 +119,7 @@ window.addEventListener("DOMContentLoaded", () => {
     shootBtn.addEventListener("click", () => {
       if (!isKicked && player) {
         isKicked = true;
-        velocity.set(10, 10, 20);
+        velocity.set(0, 10, 20);
         player.scale.y = 2.8;
         setTimeout(() => player.scale.y = 3, 100);
 
