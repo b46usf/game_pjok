@@ -96,11 +96,11 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const label3 = createLabel("3", "#c0392b");
-  label3.position.set(4, 2.5, -19.6);
+  label3.position.set(10, 2.5, -19.6);
   scene.add(label3);
 
   const label4 = createLabel("4", "#2980b9");
-  label4.position.set(-4, 2.5, -19.6);
+  label4.position.set(-10, 2.5, -19.6);
   scene.add(label4);
 
   // === Kontrol Keyboard (Gerak horizontal sebelum ditendang) ===
