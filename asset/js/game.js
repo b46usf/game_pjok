@@ -8,8 +8,8 @@ window.addEventListener("DOMContentLoaded", () => {
     0.1,
     1000
   );
-  camera.position.set(0, 2.8, 12);  // 📌 Mundur dan agak rendah
-  camera.lookAt(0, 1.6, 0);         // 📌 Fokus ke tengah badan pemain
+  camera.position.set(0, 2.8, 12);
+  camera.lookAt(0, 1.6, 0);
 
   const canvas = document.getElementById("gameCanvas");
   const renderer = new THREE.WebGLRenderer({
@@ -46,8 +46,8 @@ window.addEventListener("DOMContentLoaded", () => {
       });
 
       player = new THREE.Sprite(material);
-      player.scale.set(1.5, 3, 1);         // 📌 Ukuran tubuh full
-      player.position.set(0, 1.5, 8);      // 📌 Pasin kaki ke bawah
+      player.scale.set(1.5, 3, 1);
+      player.position.set(0, 1.5, 6); // 📌 Dimajukan dari 8 ke 6
       scene.add(player);
     },
     undefined,
@@ -56,27 +56,24 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   );
 
-  // === Bola ===
-  const ball = new THREE.Mesh(
-    new THREE.SphereGeometry(0.5, 32, 32),
-    new THREE.MeshStandardMaterial({ color: 0xffffff })
-  );
-  ball.position.set(0, 0.5, 8);
-  scene.add(ball);
+  // === Bola (hanya ditambahkan setelah klik) ===
+  let ball;
+  let isKicked = false;
+  let velocity = new THREE.Vector3();
 
   // === Gawang + Label Angka ===
   const goal1 = new THREE.Mesh(
     new THREE.BoxGeometry(3, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0xff6666 })
   );
-  goal1.position.set(4, 1, -10);
+  goal1.position.set(4, 1, -20); // 📌 Mundur dari -10 ke -20
   scene.add(goal1);
 
   const goal2 = new THREE.Mesh(
     new THREE.BoxGeometry(3, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0x66ccff })
   );
-  goal2.position.set(-4, 1, -10);
+  goal2.position.set(-4, 1, -20); // 📌 Mundur dari -10 ke -20
   scene.add(goal2);
 
   function createLabel(text, color) {
@@ -99,11 +96,11 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const label3 = createLabel("3", "#c0392b");
-  label3.position.set(4, 2.5, -9.6);
+  label3.position.set(4, 2.5, -19.6);
   scene.add(label3);
 
   const label4 = createLabel("4", "#2980b9");
-  label4.position.set(-4, 2.5, -9.6);
+  label4.position.set(-4, 2.5, -19.6);
   scene.add(label4);
 
   // === Kontrol Keyboard (Gerak horizontal sebelum ditendang) ===
@@ -117,17 +114,22 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   // === Tembakan Bola ===
-  let isKicked = false;
-  let velocity = new THREE.Vector3();
-
   const shootBtn = document.getElementById("shootBtn");
   if (shootBtn) {
     shootBtn.addEventListener("click", () => {
       if (!isKicked && player) {
         isKicked = true;
         velocity.set(0, 0.1, -0.4);
-        player.scale.y = 2.8; // animasi kecil
+        player.scale.y = 2.8;
         setTimeout(() => player.scale.y = 3, 100);
+
+        // Tambahkan bola ke scene saat tombol ditekan
+        ball = new THREE.Mesh(
+          new THREE.SphereGeometry(0.5, 32, 32),
+          new THREE.MeshStandardMaterial({ color: 0xffffff })
+        );
+        ball.position.set(player.position.x, 0.5, player.position.z);
+        scene.add(ball);
       }
     });
   }
@@ -137,14 +139,13 @@ window.addEventListener("DOMContentLoaded", () => {
     requestAnimationFrame(animate);
 
     if (!isKicked) {
-      ball.position.x += moveDir * 0.1;
       if (player) player.position.x += moveDir * 0.1;
-
-      ball.position.x = THREE.MathUtils.clamp(ball.position.x, -5, 5);
       if (player) player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
     } else {
-      ball.position.add(velocity);
-      velocity.y -= 0.008;
+      if (ball) {
+        ball.position.add(velocity);
+        velocity.y -= 0.008;
+      }
     }
 
     renderer.render(scene, camera);
