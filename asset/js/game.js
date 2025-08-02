@@ -485,4 +485,3 @@ function hideGameplayElements() {
   if (labelA) labelA.visible = false;
   if (labelB) labelB.visible = false;
 }
-
