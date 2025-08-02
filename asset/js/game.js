@@ -12,6 +12,7 @@ let currentLevel = 1;
 let labelA, labelB;
 let score = 0;
 let cinematicProgress = 0;
+let isSlowMotion = false;
 
 const questions = {
   1: { soal: "Angka Genap", jawaban: ["2", "3"], benar: "2" },
@@ -231,39 +232,45 @@ function updateGameLogic() {
   } 
 
   if (isKicked && ball) {
-    // Gerak bola
+    // Aktifkan slow motion jika bola dekat gawang
+    if (ball.position.z < -10 && !isSlowMotion) {
+      isSlowMotion = true;
+      velocity.multiplyScalar(0.3); // perlambat gerak bola
+    }
+
+    // Gerakkan bola
     ball.position.x += velocity.x;
     ball.position.z += velocity.z;
     ball.position.y = 0.2;
 
     // Efek kamera cinematic
     if (cinematicProgress < 1) {
-      cinematicProgress += 0.01;
+      cinematicProgress += isSlowMotion ? 0.003 : 0.01; // slowmo = gerak lebih lambat
 
-      // Kamera bergerak naik dan ke depan
       const targetCamPos = new THREE.Vector3(
         ball.position.x,
-        5 + cinematicProgress * 3, // naik pelan
-        ball.position.z + 8 - cinematicProgress * 6 // maju ke arah gawang
+        5 + cinematicProgress * 3,
+        ball.position.z + 8 - cinematicProgress * 6
       );
 
-      camera.position.lerp(targetCamPos, 0.05);
+      camera.position.lerp(targetCamPos, isSlowMotion ? 0.02 : 0.05);
       camera.lookAt(ball.position);
     }
 
-    // Saat bola sudah jauh → reset
+    // Jika bola sudah sangat jauh
     if (ball.position.z < -20) {
       isKicked = false;
-      velocity.set(0, 0, 0);
+      isSlowMotion = false;
       cinematicProgress = 0;
+      velocity.set(0, 0, 0);
 
-      // Reset bola ke depan kaki kanan
+      // Reset posisi bola
       const offsetX = 0.3;
       const offsetY = 0.2;
       const offsetZ = 1;
       ball.position.set(player.position.x + offsetX, offsetY, player.position.z - offsetZ);
 
-      // Reset kamera ke posisi awal
+      // Reset kamera
       camera.position.set(0, 5, 10);
       camera.lookAt(0, 0, 0);
     }
