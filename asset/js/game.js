@@ -305,7 +305,7 @@ function updateLabelTextures() {
 }
 
 function createBall() {
-  const geometry = new THREE.SphereGeometry(0.2);
+  const geometry = new THREE.SphereGeometry(0.3, 32, 32);
   const texture = new THREE.TextureLoader().load("asset/image/soccer-ball.png");
   const material = new THREE.MeshStandardMaterial({ map: texture });
 
