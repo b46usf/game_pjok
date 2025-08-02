@@ -288,15 +288,17 @@ function updateLabelTextures() {
 }
 
 function createBall() {
-  const geometry = new THREE.SphereGeometry(0.4, 32, 32); // ⬅️ radius diperbesar dari 0.2 ke 0.3
+  const geometry = new THREE.SphereGeometry(0.3, 32, 32); // ⬅️ radius diperbesar dari 0.2 ke 0.3
   const texture = new THREE.TextureLoader().load("asset/image/soccer-ball.png");
   const material = new THREE.MeshStandardMaterial({ map: texture });
 
   ball = new THREE.Mesh(geometry, material);
 
-  // Geser bola ke kanan: tambah +0.3 pada posisi x
-  const offsetX = 0.3; // atau sesuaikan nilai ini
-  ball.position.set(player.position.x + offsetX, 0.5, player.position.z - 1); 
+  // Arahkan bola ke depan kanan player
+  const offsetX = 0.25;   // ke kanan (dari kaki kanan)
+  const offsetY = 0.2;    // setinggi kaki
+  const offsetZ = -0.3;   // sedikit di depan player
+  ball.position.set(player.position.x + offsetX, offsetY, player.position.z - offsetZ); 
 
   scene.add(ball);
 }
