@@ -46,14 +46,14 @@ window.addEventListener("DOMContentLoaded", () => {
     new THREE.BoxGeometry(10, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0xff6666 })
   );
-  goal1.position.set(10, 15, -20);
+  goal1.position.set(10, 4, -20);
   scene.add(goal1);
 
   const goal2 = new THREE.Mesh(
     new THREE.BoxGeometry(10, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0x66ccff })
   );
-  goal2.position.set(-10, 15, -20);
+  goal2.position.set(-10, 4, -20);
   scene.add(goal2);
 
   function createLabel(text, color) {
