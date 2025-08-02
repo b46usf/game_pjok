@@ -76,11 +76,11 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const label3 = createLabel("3", "#c0392b");
-  label3.position.set(10, 5, -25);
+  label3.position.set(10, 10, -25);
   scene.add(label3);
 
   const label4 = createLabel("4", "#2980b9");
-  label4.position.set(-10, 5, -25);
+  label4.position.set(-10, 10, -25);
   scene.add(label4);
 
   // === Kontrol Pemain ===
