@@ -54,7 +54,7 @@ window.addEventListener("DOMContentLoaded", () => {
       new THREE.PlaneGeometry(10, 7), // Lebar dan tinggi gawang
       goalMaterial
     );
-    goal1.position.set(10, 3, -20);
+    goal1.position.set(10, 4, -20);
     // goal1.rotation.y = -Math.PI / 2; // Menghadap ke kiri
     scene.add(goal1);
 
@@ -62,7 +62,7 @@ window.addEventListener("DOMContentLoaded", () => {
       new THREE.PlaneGeometry(10, 7),
       goalMaterial.clone()
     );
-    goal2.position.set(-10, 3, -20);
+    goal2.position.set(-10, 4, -20);
     // goal2.rotation.y = Math.PI / 2; // Menghadap ke kanan
     scene.add(goal2);
   });
@@ -87,11 +87,11 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const label3 = createLabel("3", "#c0392b");
-  label3.position.set(10, 5, -25);
+  label3.position.set(10, 8, -25);
   scene.add(label3);
 
   const label4 = createLabel("4", "#2980b9");
-  label4.position.set(-10, 5, -25);
+  label4.position.set(-10, 8, -25);
   scene.add(label4);
 
   // === Kontrol Pemain ===
