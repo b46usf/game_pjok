@@ -112,8 +112,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const gravity = 0.4;
 
   // === Tembakan ===
-  const shootBtn = document.getElementById("shootBtn");
-  shootBtn.addEventListener("click", () => {
+  // const shootBtn = document.getElementById("shootBtn");
+  /* shootBtn.addEventListener("click", () => {
     if (!isKicked && player) {
       isKicked = true;
       player.scale.y = 2.8;
@@ -134,7 +134,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const dir = new THREE.Vector3().subVectors(to, from).normalize();
       velocity.copy(dir.multiplyScalar(1.5)); // Power horizontal
     }
-  });
+  }); */
 
   // === Game Loop ===
   function animate() {
@@ -167,4 +167,27 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   animate();
+
+// === Ubah Pertanyaan secara Dinamis ===
+const questionText = document.getElementById("questionText");
+questionText.textContent = "Angka Genap"; // Atur soal secara dinamis di sini
+
+// === Kontrol UI ===
+const questionBox = document.getElementById("questionBox");
+const startBox = document.getElementById("startBox");
+const scoreBox = document.querySelector('[id="score"]').parentElement.parentElement;
+
+scoreBox.style.display = "none"; // Sembunyikan skor awalnya
+
+// === Mulai ===
+const startBtn = document.getElementById("startBtn");
+startBtn.addEventListener("click", () => {
+  // Sembunyikan soal dan tombol mulai
+  questionBox.style.display = "none";
+  startBox.style.display = "none";
+
+  // Tampilkan skor
+  scoreBox.style.display = "block";
+});
+
 });
