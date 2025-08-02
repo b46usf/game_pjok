@@ -358,3 +358,8 @@ function removeConfetti() {
     isCelebrating = false;
   }
 }
+
+window.addEventListener("load", () => {
+  const q = document.getElementById("questionText");
+  if (q) q.textContent = "Tes muncul?";
+});
