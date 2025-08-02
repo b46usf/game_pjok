@@ -90,17 +90,6 @@ function setupScene() {
   scene = new THREE.Scene();
 }
 
-function setupCamera() {
-  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-  resetCamera();
-}
-
-function resetCamera() {
-  if (!camera) return;
-  camera.position.copy(DEFAULT_CAMERA_POS);
-  updateCameraLookAt(ball.position);
-}
-
 function setupRenderer() {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -149,11 +138,28 @@ function createBall() {
   ball = new THREE.Mesh(geometry, material);
   resetBallPosition();
   scene.add(ball);
+
+  // Panggil setelah ball tersedia
+  resetCamera();
 }
 
 function resetBallPosition() {
   if (!player || !ball) return;
   ball.position.set(player.position.x + 0.3, 0.2, player.position.z - 1);
+}
+
+function setupCamera() {
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+}
+
+function resetCamera() {
+  if (!camera) return;
+  camera.position.copy(DEFAULT_CAMERA_POS);
+  if (ball) {
+    updateCameraLookAt(ball.position);
+  } else {
+    updateCameraLookAt(new THREE.Vector3(0, 1.5, 0)); // fallback target
+  }
 }
 
 function loadGoals() {
