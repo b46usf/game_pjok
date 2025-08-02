@@ -230,7 +230,10 @@ function updateGameLogic() {
     }
 
     ball.position.add(velocity);
-    ball.position.y = 0.2;
+    elevationSpeed -= gravity;
+    elevation += elevationSpeed;
+    ball.position.y = Math.max(elevation, 0.2);
+
 
     if (cinematicProgress < 1) {
       cinematicProgress += isSlowMotion ? 0.003 : 0.01;
@@ -262,7 +265,6 @@ function updateQuestionUI() {
   if (questionText) {
     questionText.textContent = currentQuestion.question || "SOAL KOSONG!";
   }
-  questionText.textContent = currentQuestion.question || "SOAL KOSONG!";
   updateLabelTextures();
 }
 
