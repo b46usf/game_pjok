@@ -11,6 +11,8 @@ let currentQuestion = {};
 let currentLevel = 1;
 let labelA, labelB;
 let score = 0;
+let cinematicProgress = 0;
+
 const questions = {
   1: { soal: "Angka Genap", jawaban: ["2", "3"], benar: "2" },
   2: { soal: "Bilangan Prima", jawaban: ["4", "5"], benar: "5" },
@@ -229,27 +231,31 @@ function updateGameLogic() {
   } 
 
   if (isKicked && ball) {
-    // Gerakkan bola
+    // Gerak bola
     ball.position.x += velocity.x;
     ball.position.z += velocity.z;
     ball.position.y = 0.2;
 
-    // Kamera mengikuti bola dari belakang
-    const camOffset = new THREE.Vector3(0, 3, 6); // posisi kamera relatif ke bola
-    const targetCamPos = new THREE.Vector3(
-      ball.position.x + camOffset.x,
-      ball.position.y + camOffset.y,
-      ball.position.z + camOffset.z
-    );
+    // Efek kamera cinematic
+    if (cinematicProgress < 1) {
+      cinematicProgress += 0.01;
 
-    // Lerp untuk smooth movement kamera
-    camera.position.lerp(targetCamPos, 0.05);
-    camera.lookAt(ball.position);
+      // Kamera bergerak naik dan ke depan
+      const targetCamPos = new THREE.Vector3(
+        ball.position.x,
+        5 + cinematicProgress * 3, // naik pelan
+        ball.position.z + 8 - cinematicProgress * 6 // maju ke arah gawang
+      );
 
-    // Jika bola melewati gawang
+      camera.position.lerp(targetCamPos, 0.05);
+      camera.lookAt(ball.position);
+    }
+
+    // Saat bola sudah jauh → reset
     if (ball.position.z < -20) {
       isKicked = false;
       velocity.set(0, 0, 0);
+      cinematicProgress = 0;
 
       // Reset bola ke depan kaki kanan
       const offsetX = 0.3;
