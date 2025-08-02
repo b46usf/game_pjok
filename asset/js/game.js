@@ -1,7 +1,70 @@
-window.addEventListener("DOMContentLoaded", () => {
-  // === Setup Scene, Camera, Renderer ===
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(
+// === Global Variables ===
+let scene, camera, renderer;
+let player, ball;
+let moveDir = 0, isKicked = false;
+let velocity = new THREE.Vector3();
+let elevation = 0;
+let elevationSpeed = 0;
+const gravity = 0.4;
+let animationId;
+
+// === DOM Elements ===
+const canvas = document.getElementById("gameCanvas");
+const startBtn = document.getElementById("startBtn");
+const questionBox = document.getElementById("questionBox");
+const startBox = document.getElementById("startBox");
+const scoreBox = document.querySelector('[id="score"]').parentElement.parentElement;
+const questionText = document.getElementById("questionText");
+
+// === UI Setup ===
+scoreBox.style.display = "none";
+canvas.style.display = "none";
+questionText.textContent = "Angka Genap";
+
+// === Event Listeners ===
+startBtn.addEventListener("click", () => {
+  questionBox.style.display = "none";
+  startBox.style.display = "none";
+  scoreBox.style.display = "block";
+  canvas.style.display = "block";
+  init();
+  animate();
+});
+
+window.addEventListener("resize", () => {
+  if (camera && renderer) {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowLeft") moveDir = -1;
+  else if (e.key === "ArrowRight") moveDir = 1;
+});
+
+document.addEventListener("keyup", (e) => {
+  if (e.key === "ArrowLeft" || e.key === "ArrowRight") moveDir = 0;
+});
+
+// === Initialization ===
+function init() {
+  setupScene();
+  setupCamera();
+  setupRenderer();
+  setupLighting();
+  loadPlayer();
+  loadGoals();
+  createLabels();
+}
+
+function setupScene() {
+  scene = new THREE.Scene();
+}
+
+function setupCamera() {
+  camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -9,29 +72,25 @@ window.addEventListener("DOMContentLoaded", () => {
   );
   camera.position.set(0, 2.8, 12);
   camera.lookAt(0, 1.6, 0);
+}
 
-  const canvas = document.getElementById("gameCanvas");
-  const renderer = new THREE.WebGLRenderer({
+function setupRenderer() {
+  renderer = new THREE.WebGLRenderer({
     canvas: canvas,
     antialias: true,
     alpha: true,
   });
   renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
-  window.addEventListener("resize", () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-
-  // === Lighting ===
+function setupLighting() {
   const dirLight = new THREE.DirectionalLight(0xffffff, 1);
   dirLight.position.set(10, 10, 10);
   scene.add(dirLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+}
 
-  // === Sprite Player ===
-  let player;
+function loadPlayer() {
   const loader = new THREE.TextureLoader();
   loader.load("asset/image/player.png", (texture) => {
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
@@ -40,33 +99,28 @@ window.addEventListener("DOMContentLoaded", () => {
     player.position.set(0, 1.5, 6);
     scene.add(player);
   });
+}
 
-  // === Gawang + Label Angka ===
+function loadGoals() {
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load("asset/image/goal.png", (goalTexture) => {
     const goalMaterial = new THREE.MeshBasicMaterial({
       map: goalTexture,
       transparent: true,
-      side: THREE.DoubleSide
+      side: THREE.DoubleSide,
     });
 
-    const goal1 = new THREE.Mesh(
-      new THREE.PlaneGeometry(10, 7), // Lebar dan tinggi gawang
-      goalMaterial
-    );
+    const goal1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial);
     goal1.position.set(10, 4, -20);
-    // goal1.rotation.y = -Math.PI / 2; // Menghadap ke kiri
     scene.add(goal1);
 
-    const goal2 = new THREE.Mesh(
-      new THREE.PlaneGeometry(10, 7),
-      goalMaterial.clone()
-    );
+    const goal2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial.clone());
     goal2.position.set(-10, 4, -20);
-    // goal2.rotation.y = Math.PI / 2; // Menghadap ke kanan
     scene.add(goal2);
   });
+}
 
+function createLabels() {
   function createLabel(text, color) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -78,7 +132,6 @@ window.addEventListener("DOMContentLoaded", () => {
     ctx.font = "bold 40px sans-serif";
     ctx.textAlign = "center";
     ctx.fillText(text, canvas.width / 2, 48);
-
     const texture = new THREE.CanvasTexture(canvas);
     const material = new THREE.SpriteMaterial({ map: texture });
     const sprite = new THREE.Sprite(material);
@@ -93,101 +146,35 @@ window.addEventListener("DOMContentLoaded", () => {
   const label4 = createLabel("4", "#2980b9");
   label4.position.set(-10, 8, -25);
   scene.add(label4);
+}
 
-  // === Kontrol Pemain ===
-  let moveDir = 0;
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowLeft") moveDir = -1;
-    else if (e.key === "ArrowRight") moveDir = 1;
-  });
-  document.addEventListener("keyup", (e) => {
-    if (e.key === "ArrowLeft" || e.key === "ArrowRight") moveDir = 0;
-  });
+// === Animation ===
+function animate() {
+  animationId = requestAnimationFrame(animate);
+  updateGameLogic();
+  renderer.render(scene, camera);
+}
 
-  // === Bola ===
-  let ball, isKicked = false;
-  let velocity = new THREE.Vector3();
-  let elevation = 0;
-  let elevationSpeed = 0;
-  const gravity = 0.4;
+function updateGameLogic() {
+  if (!isKicked && player) {
+    player.position.x += moveDir * 0.1;
+    player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
+  } else if (ball) {
+    ball.position.x += velocity.x;
+    ball.position.z += velocity.z;
 
-  // === Tembakan ===
-  // const shootBtn = document.getElementById("shootBtn");
-  /* shootBtn.addEventListener("click", () => {
-    if (!isKicked && player) {
-      isKicked = true;
-      player.scale.y = 2.8;
-      setTimeout(() => player.scale.y = 3, 100);
+    elevationSpeed -= gravity * 0.1;
+    elevation += elevationSpeed * 0.1;
+    ball.position.y = Math.max(0.5, elevation);
 
-      ball = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 32, 32),
-        new THREE.MeshStandardMaterial({ color: 0xffffff })
-      );
-      ball.position.set(player.position.x, 0.5, player.position.z);
-      elevation = 0.5;
-      elevationSpeed = 2.5;
-      scene.add(ball);
-
-      // Arah ke label4
-      const from = new THREE.Vector3(ball.position.x, 0, ball.position.z);
-      const to = new THREE.Vector3(label4.position.x, 0, label4.position.z);
-      const dir = new THREE.Vector3().subVectors(to, from).normalize();
-      velocity.copy(dir.multiplyScalar(1.5)); // Power horizontal
+    if (elevation <= 0.5 && elevationSpeed < 0) {
+      isKicked = false;
+      elevationSpeed = 0;
+      velocity.set(0, 0, 0);
     }
-  }); */
-
-  // === Game Loop ===
-  function animate() {
-    requestAnimationFrame(animate);
-
-    if (!isKicked) {
-      if (player) {
-        player.position.x += moveDir * 0.1;
-        player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
-      }
-    } else {
-      if (ball) {
-        ball.position.x += velocity.x;
-        ball.position.z += velocity.z;
-
-        elevationSpeed -= gravity * 0.1;
-        elevation += elevationSpeed * 0.1;
-        ball.position.y = Math.max(0.5, elevation);
-
-        // Hentikan jika bola menyentuh tanah
-        if (elevation <= 0.5 && elevationSpeed < 0) {
-          isKicked = false;
-          elevationSpeed = 0;
-          velocity.set(0, 0, 0);
-        }
-      }
-    }
-
-    renderer.render(scene, camera);
   }
+}
 
-  animate();
-
-// === Ubah Pertanyaan secara Dinamis ===
-const questionText = document.getElementById("questionText");
-questionText.textContent = "Angka Genap"; // Atur soal secara dinamis di sini
-
-// === Kontrol UI ===
-const questionBox = document.getElementById("questionBox");
-const startBox = document.getElementById("startBox");
-const scoreBox = document.querySelector('[id="score"]').parentElement.parentElement;
-
-scoreBox.style.display = "none"; // Sembunyikan skor awalnya
-
-// === Mulai ===
-const startBtn = document.getElementById("startBtn");
-startBtn.addEventListener("click", () => {
-  // Sembunyikan soal dan tombol mulai
-  questionBox.style.display = "none";
-  startBox.style.display = "none";
-
-  // Tampilkan skor
-  scoreBox.style.display = "block";
-});
-
-});
+// === Optional Shoot Mechanism ===
+// Tambahkan event listener shootBtn jika diperlukan
+// dan arahkan ke target label (ex: label4)
