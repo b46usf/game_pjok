@@ -17,6 +17,8 @@ let confetti, confettiMaterial, confettiGeometry;
 let isCelebrating = false;
 const DEFAULT_CAMERA_POS = new THREE.Vector3(0, 5, 12);
 let gameState = "intro"; // "intro", "playing", "celebrating"
+let goal1, goal2;
+let feedbackSprite = null;
 
 // === Questions Data ===
 const questions = {
@@ -143,11 +145,11 @@ function loadGoals() {
   textureLoader.load("asset/image/goal.png", (goalTexture) => {
     const goalMaterial = new THREE.MeshBasicMaterial({ map: goalTexture, transparent: true, side: THREE.DoubleSide });
 
-    const goal1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial);
+    goal1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial);
     goal1.position.set(10, 4, -20);
     scene.add(goal1);
 
-    const goal2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial.clone());
+    goal2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial.clone());
     goal2.position.set(-10, 4, -20);
     scene.add(goal2);
   });
@@ -276,13 +278,18 @@ function updateQuestionUI() {
 
 function checkAnswerFromLabelHit(hitLabel) {
   const isCorrect = hitLabel === currentQuestion.correctLabel;
+
+  hideGameplayElements();
+
   if (isCorrect) {
     score++;
     updateScoreUI();
+    createConfetti();       // juga akan panggil showFeedback(true)
+  } else {
+    showFeedback(false);
   }
+
   currentLevel = Math.min(5, Math.floor(score / 1) + 1);
-  generateQuestion(currentLevel);
-  updateQuestionUI();
 }
 
 function updateLabelTextures() {
@@ -336,8 +343,8 @@ function createConfetti() {
 
   setTimeout(() => {
     removeConfetti();
-    endLevel(); // Tambahkan ini
-  }, 5000);
+    showFeedback(true);
+  }, 2500);
 }
 
 function endLevel() {
@@ -395,3 +402,38 @@ document.addEventListener("DOMContentLoaded", () => {
   updateQuestionUI();
 });
 
+function hideGameplayElements() {
+  [player, ball, goal1, goal2, labelA, labelB].forEach(obj => {
+    if (obj) obj.visible = false;
+  });
+}
+
+function showGameplayElements() {
+  [player, ball, goal1, goal2, labelA, labelB].forEach(obj => {
+    if (obj) obj.visible = true;
+  });
+}
+
+function showFeedback(isCorrect) {
+  const textureLoader = new THREE.TextureLoader();
+  const texturePath = isCorrect ? "asset/image/check.png" : "asset/image/wrong.png";
+
+  textureLoader.load(texturePath, (texture) => {
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    feedbackSprite = new THREE.Sprite(material);
+    feedbackSprite.scale.set(2, 2, 1);
+    feedbackSprite.position.set(0, 5, -10);
+    scene.add(feedbackSprite);
+
+    setTimeout(() => {
+      if (feedbackSprite) {
+        scene.remove(feedbackSprite);
+        feedbackSprite.material.dispose();
+        feedbackSprite = null;
+      }
+
+      // Setelah feedback, tampilkan ulang UI untuk next level
+      endLevel();
+    }, 2500);
+  });
+}
