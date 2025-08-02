@@ -261,7 +261,9 @@ function generateQuestion(level = 1) {
 }
 
 function updateQuestionUI() {
-  questionText.textContent = currentQuestion.question;
+  console.log("updateQuestionUI called");
+  console.log("currentQuestion:", currentQuestion);
+  questionText.textContent = currentQuestion.question || "SOAL KOSONG!";
   updateLabelTextures();
 }
 
