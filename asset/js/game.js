@@ -7,6 +7,9 @@ let elevation = 0;
 let elevationSpeed = 0;
 const gravity = 0.4;
 let animationId;
+let currentQuestion = {};
+let currentLevel = 1;
+let labelA, labelB;
 
 // === DOM Elements ===
 const canvas = document.getElementById("gameCanvas");
@@ -57,6 +60,8 @@ function init() {
   loadPlayer();
   loadGoals();
   createLabels();
+  generateQuestion(1);
+  updateQuestionUI();
 }
 
 function setupScene() {
@@ -121,7 +126,7 @@ function loadGoals() {
 }
 
 function createLabels() {
-  function createLabel(text, color) {
+  function createLabelSprite(text, color) {
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     canvas.width = 128;
@@ -136,16 +141,31 @@ function createLabels() {
     const material = new THREE.SpriteMaterial({ map: texture });
     const sprite = new THREE.Sprite(material);
     sprite.scale.set(3, 1.5, 1);
-    return sprite;
+    return { sprite, texture, canvas, ctx };
   }
 
-  const label3 = createLabel("3", "#c0392b");
-  label3.position.set(10, 8, -25);
-  scene.add(label3);
+  // Label A (kiri)
+  const labelAObj = createLabelSprite("A", "#27ae60");
+  labelA = labelAObj.sprite;
+  labelA.name = "A";
+  labelA.position.set(-10, 8, -25);
+  scene.add(labelA);
 
-  const label4 = createLabel("4", "#2980b9");
-  label4.position.set(-10, 8, -25);
-  scene.add(label4);
+  // Label B (kanan)
+  const labelBObj = createLabelSprite("B", "#8e44ad");
+  labelB = labelBObj.sprite;
+  labelB.name = "B";
+  labelB.position.set(10, 8, -25);
+  scene.add(labelB);
+
+  // Simpan akses ke update context jika ingin update texture secara dinamis
+  labelA.updateCtx = labelAObj.ctx;
+  labelA.updateCanvas = labelAObj.canvas;
+  labelA.texture = labelAObj.texture;
+
+  labelB.updateCtx = labelBObj.ctx;
+  labelB.updateCanvas = labelBObj.canvas;
+  labelB.texture = labelBObj.texture;
 }
 
 // === Animation ===
@@ -174,6 +194,95 @@ function updateGameLogic() {
     }
   }
 }
+
+function generateQuestion(level = 1) {
+  let a, b, operator, correctAnswer;
+
+  switch (level) {
+    case 1:
+      a = Math.floor(Math.random() * 9) + 1;
+      b = Math.floor(Math.random() * 9) + 1;
+      operator = '+';
+      correctAnswer = a + b;
+      break;
+    case 2:
+      a = Math.floor(Math.random() * 90) + 10;
+      b = Math.floor(Math.random() * 90) + 10;
+      operator = '+';
+      correctAnswer = a + b;
+      break;
+    case 3:
+      a = Math.floor(Math.random() * 9) + 1;
+      b = Math.floor(Math.random() * 9) + 1;
+      operator = '×';
+      correctAnswer = a * b;
+      break;
+    case 4:
+      a = Math.floor(Math.random() * 90) + 10;
+      b = Math.floor(Math.random() * 9) + 1;
+      operator = '×';
+      correctAnswer = a * b;
+      break;
+    default: // level 5
+      a = Math.floor(Math.random() * 20) + 1;
+      b = Math.floor(Math.random() * 10) + 1;
+      operator = ['+', '×'][Math.floor(Math.random() * 2)];
+      correctAnswer = operator === '+' ? a + b : a * b;
+  }
+
+  // Jawaban salah (random dan tidak sama)
+  let wrongAnswer;
+  do {
+    wrongAnswer = correctAnswer + (Math.floor(Math.random() * 10) - 5);
+  } while (wrongAnswer === correctAnswer);
+
+  // Acak posisi label jawaban
+  const isCorrectLeft = Math.random() < 0.5;
+
+  currentQuestion = {
+    question: `${a} ${operator} ${b}`,
+    correctAnswer,
+    options: isCorrectLeft ? [correctAnswer, wrongAnswer] : [wrongAnswer, correctAnswer],
+    correctLabel: isCorrectLeft ? 'A' : 'B'
+  };
+}
+
+function updateQuestionUI() {
+  questionText.textContent = currentQuestion.question;
+  updateLabelTextures();
+}
+
+function checkAnswerFromLabelHit(hitLabel) {
+  const isCorrect = hitLabel === currentQuestion.correctLabel;
+
+  if (isCorrect) {
+    score += 1;
+    updateScoreUI();
+  }
+
+  // Ganti soal baru
+  currentLevel = Math.min(5, Math.floor(score / 3) + 1); // naik tiap 3 skor
+  generateQuestion(currentLevel);
+  updateQuestionUI();
+}
+
+function updateLabelTextures() {
+  const options = currentQuestion.options;
+
+  [labelA, labelB].forEach((label, index) => {
+    const ctx = label.updateCtx;
+    const canvas = label.updateCanvas;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = index === 0 ? "#27ae60" : "#8e44ad"; // Sesuaikan warna
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 40px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(options[index], canvas.width / 2, 48);
+    label.texture.needsUpdate = true;
+  });
+}
+
 
 // === Optional Shoot Mechanism ===
 // Tambahkan event listener shootBtn jika diperlukan
