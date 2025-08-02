@@ -47,6 +47,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const goalMaterial = new THREE.MeshBasicMaterial({
       map: goalTexture,
       transparent: true,
+      side: THREE.DoubleSide // Supaya kelihatan dari dua sisi
     });
 
     const goal1 = new THREE.Mesh(
@@ -54,7 +55,7 @@ window.addEventListener("DOMContentLoaded", () => {
       goalMaterial
     );
     goal1.position.set(10, 5, -20);
-    goal1.rotation.y = -Math.PI / 2; // Menghadap ke kiri
+    // goal1.rotation.y = -Math.PI / 2; // Menghadap ke kiri
     scene.add(goal1);
 
     const goal2 = new THREE.Mesh(
@@ -62,7 +63,7 @@ window.addEventListener("DOMContentLoaded", () => {
       goalMaterial.clone()
     );
     goal2.position.set(-10, 5, -20);
-    goal2.rotation.y = Math.PI / 2; // Menghadap ke kanan
+    // goal2.rotation.y = Math.PI / 2; // Menghadap ke kanan
     scene.add(goal2);
   });
 
