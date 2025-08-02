@@ -13,6 +13,8 @@ let labelA, labelB;
 let score = 0;
 let cinematicProgress = 0;
 let isSlowMotion = false;
+let confetti, confettiMaterial, confettiGeometry;
+let isCelebrating = false;
 
 const questions = {
   1: { soal: "Angka Genap", jawaban: ["2", "3"], benar: "2" },
@@ -213,6 +215,25 @@ function animate() {
   animationId = requestAnimationFrame(animate);
   updateGameLogic();
   renderer.render(scene, camera);
+
+  if (isCelebrating && confetti) {
+    const positions = confettiGeometry.getAttribute('position');
+    const velocities = confettiGeometry.getAttribute('velocity');
+
+    for (let i = 0; i < positions.count; i++) {
+      positions.array[i * 3] += velocities.array[i * 3];
+      positions.array[i * 3 + 1] += velocities.array[i * 3 + 1];
+      positions.array[i * 3 + 2] += velocities.array[i * 3 + 2];
+
+      // Reset jika terlalu jatuh
+      if (positions.array[i * 3 + 1] < 0) {
+        positions.array[i * 3 + 1] = Math.random() * 2 + 1;
+      }
+    }
+
+    positions.needsUpdate = true;
+  }
+
 }
 
 function updateGameLogic() {
@@ -263,6 +284,9 @@ function updateGameLogic() {
       isSlowMotion = false;
       cinematicProgress = 0;
       velocity.set(0, 0, 0);
+
+      // Tambah confetti
+      createConfetti();
 
       // Reset posisi bola
       const offsetX = 0.3;
@@ -349,3 +373,47 @@ function createBall() {
 function updateScoreUI() {
   document.getElementById("score").textContent = score;
 }
+
+function createConfetti() {
+  const count = 200;
+  confettiGeometry = new THREE.BufferGeometry();
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const velocities = new Float32Array(count * 3);
+
+  for (let i = 0; i < count; i++) {
+    const i3 = i * 3;
+    positions[i3] = (Math.random() - 0.5) * 4;
+    positions[i3 + 1] = Math.random() * 2 + 1; // start dari atas
+    positions[i3 + 2] = -19 + Math.random(); // dekat gawang
+
+    // warna acak
+    colors[i3] = Math.random();
+    colors[i3 + 1] = Math.random();
+    colors[i3 + 2] = Math.random();
+
+    // velocity acak
+    velocities[i3] = (Math.random() - 0.5) * 0.1;
+    velocities[i3 + 1] = -Math.random() * 0.05;
+    velocities[i3 + 2] = (Math.random() - 0.5) * 0.1;
+  }
+
+  confettiGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  confettiGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  confettiGeometry.setAttribute('velocity', new THREE.BufferAttribute(velocities, 3));
+
+  confettiMaterial = new THREE.PointsMaterial({ size: 0.1, vertexColors: true });
+  confetti = new THREE.Points(confettiGeometry, confettiMaterial);
+  scene.add(confetti);
+  isCelebrating = true;
+}
+
+setTimeout(() => {
+  if (confetti) {
+    scene.remove(confetti);
+    confetti.geometry.dispose();
+    confetti.material.dispose();
+    confetti = null;
+    isCelebrating = false;
+  }
+}, 5000); // hilangkan konfeti setelah 5 detik
