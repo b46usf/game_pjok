@@ -42,19 +42,29 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   // === Gawang + Label Angka ===
-  const goal1 = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 2, 0.5),
-    new THREE.MeshStandardMaterial({ color: 0xff6666 })
-  );
-  goal1.position.set(10, 5, -20);
-  scene.add(goal1);
+  const textureLoader = new THREE.TextureLoader();
+  textureLoader.load("asset/image/goal.png", (goalTexture) => {
+    const goalMaterial = new THREE.MeshBasicMaterial({
+      map: goalTexture,
+      transparent: true,
+    });
 
-  const goal2 = new THREE.Mesh(
-    new THREE.BoxGeometry(10, 2, 0.5),
-    new THREE.MeshStandardMaterial({ color: 0x66ccff })
-  );
-  goal2.position.set(-10, 5, -20);
-  scene.add(goal2);
+    const goal1 = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 7), // Lebar dan tinggi gawang
+      goalMaterial
+    );
+    goal1.position.set(10, 5, -20);
+    goal1.rotation.y = -Math.PI / 2; // Menghadap ke kiri
+    scene.add(goal1);
+
+    const goal2 = new THREE.Mesh(
+      new THREE.PlaneGeometry(10, 7),
+      goalMaterial.clone()
+    );
+    goal2.position.set(-10, 5, -20);
+    goal2.rotation.y = Math.PI / 2; // Menghadap ke kanan
+    scene.add(goal2);
+  });
 
   function createLabel(text, color) {
     const canvas = document.createElement("canvas");
