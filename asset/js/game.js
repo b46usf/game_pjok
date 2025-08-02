@@ -46,6 +46,7 @@ document.addEventListener("keyup", onKeyUp);
 
 // === Game Initialization ===
 function startGame() {
+  removeConfetti();
   const congrats = document.getElementById("congratsText");
   if (congrats) congrats.remove(); // jika ada sisa elemen
 
@@ -140,6 +141,7 @@ function createBall() {
 }
 
 function resetBallPosition() {
+  if (!ball || !player) return;
   ball.position.set(player.position.x + 0.3, 0.2, player.position.z - 1);
 }
 
@@ -170,12 +172,7 @@ function createLabel(name, color, xPosition) {
   canvas.height = 64;
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = color;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 40px sans-serif";
-  ctx.textAlign = "center";
-  ctx.fillText(name, canvas.width / 2, 48);
+  drawLabelToCanvas(ctx, name, color);
 
   const texture = new THREE.CanvasTexture(canvas);
   const material = new THREE.SpriteMaterial({ map: texture });
@@ -245,17 +242,6 @@ function updateGameLogic() {
       camera.position.lerp(targetCamPos, isSlowMotion ? 0.02 : 0.05);
       camera.lookAt(ball.position);
     }
-
-    /* if (ball.position.z < -20) {
-      isKicked = false;
-      isSlowMotion = false;
-      cinematicProgress = 0;
-      velocity.set(0, 0, 0);
-      createConfetti();
-      resetBallPosition();
-      resetCamera();
-    } */
-
   }
 }
 
@@ -273,22 +259,17 @@ function generateQuestion(level = 1) {
 }
 
 function updateQuestionUI() {
-  console.log("updateQuestionUI called");
-  console.log("currentQuestion:", currentQuestion);
+  if (questionText) {
+    questionText.textContent = currentQuestion.question || "SOAL KOSONG!";
+  }
   questionText.textContent = currentQuestion.question || "SOAL KOSONG!";
   updateLabelTextures();
 }
 
 function checkAnswerFromLabelHit(hitLabel) {
   const isCorrect = hitLabel === currentQuestion.correctLabel;
-
-  hideGameplayElements();
-
-  // Reset physics
-  isKicked = false;
-  isSlowMotion = false;
-  cinematicProgress = 0;
-  velocity.set(0, 0, 0);
+  toggleGameplayVisibility(false);
+  resetBallPhysics();
 
   if (isCorrect) {
     score++;
@@ -320,16 +301,10 @@ function handlePostLevel() {
 
 function updateLabelTextures() {
   if (!labelA || !labelB) return;
-  [labelA, labelB].forEach((label, i) => {
-    const ctx = label.updateCtx;
-    const canvas = label.updateCanvas;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = i === 0 ? "#1900FF" : "#FF0040";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#fff";
-    ctx.font = "bold 40px sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillText(currentQuestion.options[i], canvas.width / 2, 48);
+  const labels = [labelA, labelB];
+  labels.forEach((label, i) => {
+    if (!currentQuestion.options || currentQuestion.options.length < 2) return;
+    drawLabelToCanvas(label.updateCtx, currentQuestion.options[i], i === 0 ? "#1900FF" : "#FF0040");
     label.texture.needsUpdate = true;
   });
 }
@@ -374,14 +349,19 @@ function createConfetti(callback) {
 }
 
 function endLevel() {
+  removeConfetti();
   gameState = "intro";
   canvas.style.display = "none";
   questionBox.style.display = "block";
   startBox.style.display = "block";
   startBtn.textContent = "Next Level";
-  generateQuestion(currentLevel);
-  updateQuestionUI();
+  prepareNextLevel();
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+  questionBox.style.display = "block";
+  prepareNextLevel();
+});
 
 function updateConfetti() {
   if (!isCelebrating || !confetti) return;
@@ -413,22 +393,9 @@ function removeConfetti() {
   }
 }
 
-// Tambahkan ini di akhir JS file
-document.addEventListener("DOMContentLoaded", () => {
-  questionBox.style.display = "block";  // opsional, jika sempat di-hide
-  generateQuestion(currentLevel);
-  updateQuestionUI();
-});
-
-function hideGameplayElements() {
+function toggleGameplayVisibility(visible) {
   [player, ball, goal1, goal2, labelA, labelB].forEach(obj => {
-    if (obj) obj.visible = false;
-  });
-}
-
-function showGameplayElements() {
-  [player, ball, goal1, goal2, labelA, labelB].forEach(obj => {
-    if (obj) obj.visible = true;
+    if (obj) obj.visible = visible;
   });
 }
 
@@ -456,7 +423,7 @@ function showFeedback(isCorrect, callback) {
 }
 
 function endGame() {
-  hideGameplayElements();
+  toggleGameplayVisibility(false);
   isKicked = false;
   isSlowMotion = false;
   cinematicProgress = 0;
@@ -479,9 +446,24 @@ function endGame() {
   };
 }
 
-function hideGameplayElements() {
-  if (player) player.visible = false;
-  if (ball) ball.visible = false;
-  if (labelA) labelA.visible = false;
-  if (labelB) labelB.visible = false;
+function resetBallPhysics() {
+  isKicked = false;
+  isSlowMotion = false;
+  cinematicProgress = 0;
+  velocity.set(0, 0, 0);
+}
+
+function drawLabelToCanvas(ctx, text, bgColor) {
+  ctx.clearRect(0, 0, 128, 64);
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, 128, 64);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 40px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(text, 64, 48);
+}
+
+function prepareNextLevel() {
+  generateQuestion(currentLevel);
+  updateQuestionUI();
 }
