@@ -153,9 +153,10 @@ function loadGoals() {
   });
 }
 
-function createLabels() {
-  labelA = createLabel("A", "#27ae60", -10);
-  labelB = createLabel("B", "#8e44ad", 10);
+function createLabels() { 
+  labelA = createLabel("A", "#1900FF", -10);
+  labelB = createLabel("B", "#FF0040", 10);
+  console.log("Label A & B created", labelA, labelB);
 }
 
 function createLabel(name, color, xPosition) {
@@ -285,6 +286,7 @@ function checkAnswerFromLabelHit(hitLabel) {
 }
 
 function updateLabelTextures() {
+  if (!labelA || !labelB) return;
   [labelA, labelB].forEach((label, i) => {
     const ctx = label.updateCtx;
     const canvas = label.updateCanvas;
