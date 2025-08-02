@@ -220,27 +220,30 @@ function updateGameLogic() {
 
     // Jika bola ada, posisinya ikut player (depan kaki kanan)
     if (ball) {
-      const offsetX = 0.3;   // ke kanan dari player
-      const offsetY = 0.2;   // tinggi bola
-      const offsetZ = 1;     // sedikit di depan player
+      const offsetX = 0.3;
+      const offsetY = 0.2;
+      const offsetZ = 1;
       ball.position.set(player.position.x + offsetX, offsetY, player.position.z - offsetZ);
+      ball.scale.set(1, 1, 1); // Ukuran bola stabil
     }
   } 
-  
+
   else if (isKicked && ball) {
     // Gerakkan bola ke depan (z) dan kanan/kiri (x)
     ball.position.x += velocity.x;
     ball.position.z += velocity.z;
 
-    // Tetap di udara (tidak turun)
+    // Tetap di udara
     ball.position.y = 0.2;
 
+    // Stabilkan ukuran bola
+    ball.scale.set(1, 1, 1);
+
     // Deteksi jika bola sudah melewati gawang (misalnya z < -20)
-    if (ball.position.z < -20) {
+    if (ball.position.z < -25) {
       isKicked = false;
       velocity.set(0, 0, 0);
-      
-      // Reset posisi bola ke depan kaki kanan player
+
       const offsetX = 0.3;
       const offsetY = 0.2;
       const offsetZ = 1;
