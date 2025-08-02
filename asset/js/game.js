@@ -16,17 +16,9 @@ let isSlowMotion = false;
 let confetti, confettiMaterial, confettiGeometry;
 let isCelebrating = false;
 const DEFAULT_CAMERA_POS = new THREE.Vector3(0, 5, 12);
-let gameState = "intro";
+let gameState = "intro"; // "intro", "playing", "celebrating"
 let goal1, goal2;
 let feedbackSprite = null;
-let lastLookAtTarget = new THREE.Vector3();
-
-function updateCameraLookAt(target) {
-  if (!lastLookAtTarget.equals(target)) {
-    camera.lookAt(target);
-    lastLookAtTarget.copy(target);
-  }
-}
 
 // === Questions Data ===
 const questions = {
@@ -51,19 +43,15 @@ canvas.addEventListener("mousedown", onCanvasClick);
 window.addEventListener("resize", onWindowResize);
 document.addEventListener("keydown", onKeyDown);
 document.addEventListener("keyup", onKeyUp);
-document.addEventListener("DOMContentLoaded", () => {
-  questionBox.style.display = "block";
-  generateQuestion(currentLevel);
-  updateQuestionUI();
-});
 
-// === Game Functions ===
+// === Game Initialization ===
 function startGame() {
-  if (gameState !== "intro") return; // Blok jika bukan di halaman awal
-  gameState = "playing";
-
   const congrats = document.getElementById("congratsText");
-  if (congrats) congrats.remove();
+  if (congrats) congrats.remove(); // jika ada sisa elemen
+
+  if (gameState !== "intro") return;
+
+  gameState = "playing";
 
   questionBox.style.display = "none";
   startBox.style.display = "none";
@@ -88,6 +76,17 @@ function init() {
 
 function setupScene() {
   scene = new THREE.Scene();
+}
+
+function setupCamera() {
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  resetCamera();
+}
+
+function resetCamera() {
+  if (!camera) return;
+  camera.position.copy(DEFAULT_CAMERA_POS);
+  camera.lookAt(new THREE.Vector3(0, 1.5, 0)); // Fokus ke pemain tengah
 }
 
 function setupRenderer() {
@@ -138,59 +137,57 @@ function createBall() {
   ball = new THREE.Mesh(geometry, material);
   resetBallPosition();
   scene.add(ball);
-
-  // Panggil setelah ball tersedia
-  resetCamera();
 }
 
 function resetBallPosition() {
-  if (!player || !ball) return;
   ball.position.set(player.position.x + 0.3, 0.2, player.position.z - 1);
-}
-
-function setupCamera() {
-  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-}
-
-function resetCamera() {
-  if (!camera) return;
-  camera.position.copy(DEFAULT_CAMERA_POS);
-  if (ball) {
-    updateCameraLookAt(ball.position);
-  } else {
-    updateCameraLookAt(new THREE.Vector3(0, 1.5, 0)); // fallback target
-  }
 }
 
 function loadGoals() {
   const textureLoader = new THREE.TextureLoader();
   textureLoader.load("asset/image/goal.png", (goalTexture) => {
     const goalMaterial = new THREE.MeshBasicMaterial({ map: goalTexture, transparent: true, side: THREE.DoubleSide });
+
     goal1 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial);
     goal1.position.set(10, 4, -20);
     scene.add(goal1);
+
     goal2 = new THREE.Mesh(new THREE.PlaneGeometry(10, 7), goalMaterial.clone());
     goal2.position.set(-10, 4, -20);
     scene.add(goal2);
   });
 }
 
-function createLabels() {
+function createLabels() { 
   labelA = createLabel("A", "#1900FF", -10);
   labelB = createLabel("B", "#FF0040", 10);
+  console.log("Label A & B created", labelA, labelB);
 }
 
 function createLabel(name, color, xPosition) {
-  const { canvas, ctx } = drawLabelCanvas(name, color);
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 64;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = color;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 40px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(name, canvas.width / 2, 48);
+
   const texture = new THREE.CanvasTexture(canvas);
   const material = new THREE.SpriteMaterial({ map: texture });
   const sprite = new THREE.Sprite(material);
   sprite.scale.set(3, 1.5, 1);
   sprite.name = name;
   sprite.position.set(xPosition, 8, -25);
+
   sprite.updateCtx = ctx;
   sprite.updateCanvas = canvas;
   sprite.texture = texture;
+
   scene.add(sprite);
   return sprite;
 }
@@ -208,10 +205,12 @@ function onCanvasClick(event) {
   if (intersects.length > 0 && !isKicked && ball) {
     const clickedLabel = intersects[0].object.name;
     const direction = new THREE.Vector3().subVectors(intersects[0].object.position, ball.position).normalize();
+
     velocity.copy(direction.multiplyScalar(0.5));
     elevation = ball.position.y;
     elevationSpeed = 1.5;
     isKicked = true;
+
     checkAnswerFromLabelHit(clickedLabel);
   }
 }
@@ -224,11 +223,9 @@ function animate() {
 }
 
 function updateGameLogic() {
-  if (!isKicked) {
-    if (player) {
-      player.position.x = THREE.MathUtils.clamp(player.position.x + moveDir * 0.1, -5, 5);
-    }
-    resetBallPosition(); // sudah aman dengan pengecekan internal
+  if (!isKicked && player && ball) {
+    player.position.x = THREE.MathUtils.clamp(player.position.x + moveDir * 0.1, -5, 5);
+    resetBallPosition();
   } else if (isKicked && ball) {
     if (ball.position.z < -10 && !isSlowMotion) {
       isSlowMotion = true;
@@ -246,46 +243,26 @@ function updateGameLogic() {
         ball.position.z + 8 - cinematicProgress * 6
       );
       camera.position.lerp(targetCamPos, isSlowMotion ? 0.02 : 0.05);
-      updateCameraLookAt(ball.position);
+      camera.lookAt(ball.position);
     }
+
+    /* if (ball.position.z < -20) {
+      isKicked = false;
+      isSlowMotion = false;
+      cinematicProgress = 0;
+      velocity.set(0, 0, 0);
+      createConfetti();
+      resetBallPosition();
+      resetCamera();
+    } */
+
   }
-}
-
-function drawLabelCanvas(text, bgColor = "#000") {
-  const canvas = document.createElement("canvas");
-  canvas.width = 128;
-  canvas.height = 64;
-  const ctx = canvas.getContext("2d");
-
-  ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = "#fff";
-  ctx.font = "bold 40px sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-  return { canvas, ctx };
 }
 
 function generateQuestion(level = 1) {
   const data = questions[level];
-
-  if (!data) {
-    console.warn(`No question found for level ${level}`);
-    currentQuestion = {
-      question: "SOAL TIDAK DITEMUKAN",
-      correctAnswer: "",
-      options: ["-", "-"],
-      correctLabel: "A"
-    };
-    return;
-  }
-
   const isCorrectLeft = Math.random() < 0.5;
-  const [correct, wrong] = data.jawaban[0] === data.benar
-    ? [data.jawaban[0], data.jawaban[1]]
-    : [data.jawaban[1], data.jawaban[0]];
+  const [correct, wrong] = data.jawaban[0] === data.benar ? data.jawaban : [data.jawaban[1], data.jawaban[0]];
 
   currentQuestion = {
     question: data.soal,
@@ -296,14 +273,22 @@ function generateQuestion(level = 1) {
 }
 
 function updateQuestionUI() {
+  console.log("updateQuestionUI called");
+  console.log("currentQuestion:", currentQuestion);
   questionText.textContent = currentQuestion.question || "SOAL KOSONG!";
   updateLabelTextures();
 }
 
 function checkAnswerFromLabelHit(hitLabel) {
   const isCorrect = hitLabel === currentQuestion.correctLabel;
+
   hideGameplayElements();
-  resetBallState();
+
+  // Reset physics
+  isKicked = false;
+  isSlowMotion = false;
+  cinematicProgress = 0;
+  velocity.set(0, 0, 0);
 
   if (isCorrect) {
     score++;
@@ -316,7 +301,9 @@ function checkAnswerFromLabelHit(hitLabel) {
 
 function showResultFeedback(isCorrect) {
   if (isCorrect) {
-    createConfetti(() => showFeedback(true, handlePostLevel));
+    createConfetti(() => {
+      showFeedback(true, handlePostLevel);
+    });
   } else {
     showFeedback(false, handlePostLevel);
   }
@@ -333,22 +320,16 @@ function handlePostLevel() {
 
 function updateLabelTextures() {
   if (!labelA || !labelB) return;
-  const labels = [labelA, labelB];
-  const bgColors = ["#1900FF", "#FF0040"];
-
-  labels.forEach((label, i) => {
+  [labelA, labelB].forEach((label, i) => {
     const ctx = label.updateCtx;
     const canvas = label.updateCanvas;
-
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = bgColors[i];
+    ctx.fillStyle = i === 0 ? "#1900FF" : "#FF0040";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#fff";
     ctx.font = "bold 40px sans-serif";
     ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(currentQuestion.options[i], canvas.width / 2, canvas.height / 2);
-
+    ctx.fillText(currentQuestion.options[i], canvas.width / 2, 48);
     label.texture.needsUpdate = true;
   });
 }
@@ -358,9 +339,6 @@ function updateScoreUI() {
 }
 
 function createConfetti(callback) {
-  // Bersihkan confetti sebelumnya dulu
-  removeConfetti();
-
   const count = 200;
   confettiGeometry = new THREE.BufferGeometry();
   const positions = new Float32Array(count * 3);
@@ -397,7 +375,6 @@ function createConfetti(callback) {
 
 function endLevel() {
   gameState = "intro";
-  removeConfetti(); // Pastikan bersih
   canvas.style.display = "none";
   questionBox.style.display = "block";
   startBox.style.display = "block";
@@ -408,17 +385,21 @@ function endLevel() {
 
 function updateConfetti() {
   if (!isCelebrating || !confetti) return;
+
   const positions = confettiGeometry.getAttribute("position");
   const velocities = confettiGeometry.getAttribute("velocity");
+
   for (let i = 0; i < positions.count; i++) {
     const i3 = i * 3;
     positions.array[i3] += velocities.array[i3];
     positions.array[i3 + 1] += velocities.array[i3 + 1];
     positions.array[i3 + 2] += velocities.array[i3 + 2];
+
     if (positions.array[i3 + 1] < 0) {
       positions.array[i3 + 1] = Math.random() * 2 + 1;
     }
   }
+
   positions.needsUpdate = true;
 }
 
@@ -431,6 +412,13 @@ function removeConfetti() {
     isCelebrating = false;
   }
 }
+
+// Tambahkan ini di akhir JS file
+document.addEventListener("DOMContentLoaded", () => {
+  questionBox.style.display = "block";  // opsional, jika sempat di-hide
+  generateQuestion(currentLevel);
+  updateQuestionUI();
+});
 
 function hideGameplayElements() {
   [player, ball, goal1, goal2, labelA, labelB].forEach(obj => {
@@ -447,34 +435,33 @@ function showGameplayElements() {
 function showFeedback(isCorrect, callback) {
   const textureLoader = new THREE.TextureLoader();
   const texturePath = isCorrect ? "asset/image/check.png" : "asset/image/wrong.png";
+
   textureLoader.load(texturePath, (texture) => {
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
     feedbackSprite = new THREE.Sprite(material);
     feedbackSprite.scale.set(2, 2, 1);
     feedbackSprite.position.set(0, 5, -10);
     scene.add(feedbackSprite);
+
     setTimeout(() => {
       if (feedbackSprite) {
         scene.remove(feedbackSprite);
         feedbackSprite.material.dispose();
         feedbackSprite = null;
       }
+
       if (typeof callback === "function") callback();
     }, 2500);
   });
 }
 
-function resetBallState() {
+function endGame() {
+  hideGameplayElements();
   isKicked = false;
   isSlowMotion = false;
   cinematicProgress = 0;
   velocity.set(0, 0, 0);
-}
 
-function endGame() {
-  hideGameplayElements();
-  removeConfetti(); // Pastikan bersih
-  resetBallState();
   canvas.style.display = "none";
   questionBox.style.display = "none";
   scoreBox.style.display = "none";
@@ -491,3 +478,11 @@ function endGame() {
     window.location.href = "index.html";
   };
 }
+
+function hideGameplayElements() {
+  if (player) player.visible = false;
+  if (ball) ball.visible = false;
+  if (labelA) labelA.visible = false;
+  if (labelB) labelB.visible = false;
+}
+
