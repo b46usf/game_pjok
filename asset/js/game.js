@@ -47,7 +47,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
       player = new THREE.Sprite(material);
       player.scale.set(1.5, 3, 1);
-      player.position.set(0, 1.5, 6); // 📌 Dimajukan dari 8 ke 6
+      player.position.set(0, 1.5, 6); // Dimajukan dari 8 ke 6
       scene.add(player);
     },
     undefined,
@@ -66,14 +66,14 @@ window.addEventListener("DOMContentLoaded", () => {
     new THREE.BoxGeometry(10, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0xff6666 })
   );
-  goal1.position.set(10, 15, -25); // 📌 Mundur dari -10 ke -20
+  goal1.position.set(10, 15, -25);
   scene.add(goal1);
 
   const goal2 = new THREE.Mesh(
     new THREE.BoxGeometry(10, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0x66ccff })
   );
-  goal2.position.set(-10, 15, -25); // 📌 Mundur dari -10 ke -20
+  goal2.position.set(-10, 15, -25);
   scene.add(goal2);
 
   function createLabel(text, color) {
@@ -119,7 +119,6 @@ window.addEventListener("DOMContentLoaded", () => {
     shootBtn.addEventListener("click", () => {
       if (!isKicked && player) {
         isKicked = true;
-        velocity.set(0, 0.500, -0.500);
         player.scale.y = 2.8;
         setTimeout(() => player.scale.y = 3, 100);
 
@@ -130,6 +129,14 @@ window.addEventListener("DOMContentLoaded", () => {
         );
         ball.position.set(player.position.x, 0.5, player.position.z);
         scene.add(ball);
+
+        // === Hitung arah bola menuju label4 ===
+        const ballPos = ball.position.clone();
+        const goalPos = label4.position.clone();
+
+        const direction = new THREE.Vector3().subVectors(goalPos, ballPos).normalize();
+        const kickPower = 0.8;
+        velocity.copy(direction.multiplyScalar(kickPower));
       }
     });
   }
@@ -144,7 +151,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       if (ball) {
         ball.position.add(velocity);
-        velocity.y -= 0.1;
+        velocity.y -= 0.008; // Gravitasi
       }
     }
 
