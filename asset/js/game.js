@@ -111,8 +111,8 @@ function setupCamera() {
     0.1,
     1000
   );
-  camera.position.set(0, 2.8, 12);
-  camera.lookAt(0, 1.6, 0);
+  camera.position.set(0, 5, 15);
+  camera.lookAt(0, 0, 0);
 }
 
 function setupRenderer() {
@@ -228,28 +228,41 @@ function updateGameLogic() {
     }
   } 
 
-  else if (isKicked && ball) {
-    // Gerakkan bola ke depan (z) dan kanan/kiri (x)
+  if (isKicked && ball) {
+    // Gerakkan bola
     ball.position.x += velocity.x;
     ball.position.z += velocity.z;
-
-    // Tetap di udara
     ball.position.y = 0.2;
 
-    // Stabilkan ukuran bola
-    ball.scale.set(1, 1, 1);
+    // Kamera mengikuti bola dari belakang
+    const camOffset = new THREE.Vector3(0, 3, 6); // posisi kamera relatif ke bola
+    const targetCamPos = new THREE.Vector3(
+      ball.position.x + camOffset.x,
+      ball.position.y + camOffset.y,
+      ball.position.z + camOffset.z
+    );
 
-    // Deteksi jika bola sudah melewati gawang (misalnya z < -20)
-    if (ball.position.z < -25) {
+    // Lerp untuk smooth movement kamera
+    camera.position.lerp(targetCamPos, 0.05);
+    camera.lookAt(ball.position);
+
+    // Jika bola melewati gawang
+    if (ball.position.z < -20) {
       isKicked = false;
       velocity.set(0, 0, 0);
 
+      // Reset bola ke depan kaki kanan
       const offsetX = 0.3;
       const offsetY = 0.2;
       const offsetZ = 1;
       ball.position.set(player.position.x + offsetX, offsetY, player.position.z - offsetZ);
+
+      // Reset kamera ke posisi awal
+      camera.position.set(0, 5, 10);
+      camera.lookAt(0, 0, 0);
     }
   }
+
 }
 
 function generateQuestion(level = 1) {
@@ -294,7 +307,7 @@ function updateLabelTextures() {
     const ctx = label.updateCtx;
     const canvas = label.updateCanvas;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = index === 0 ? "#27ae60" : "#8e44ad"; // Sesuaikan warna
+    ctx.fillStyle = index === 0 ? "#1900FFFF" : "#FF0040FF"; // Sesuaikan warna
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "#fff";
     ctx.font = "bold 40px sans-serif";
