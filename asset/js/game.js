@@ -16,7 +16,9 @@ let isSlowMotion = false;
 let confetti, confettiMaterial, confettiGeometry;
 let isCelebrating = false;
 const DEFAULT_CAMERA_POS = new THREE.Vector3(0, 5, 12);
+let gameState = "intro"; // "intro", "playing", "celebrating"
 
+// === Questions Data ===
 const questions = {
   1: { soal: "Angka Genap", jawaban: ["2", "3"], benar: "2" },
   2: { soal: "Bilangan Prima", jawaban: ["4", "5"], benar: "5" },
@@ -42,11 +44,16 @@ document.addEventListener("keyup", onKeyUp);
 
 // === Game Initialization ===
 function startGame() {
+  if (gameState !== "intro") return;
+
+  gameState = "playing";
+
   questionBox.style.display = "none";
   startBox.style.display = "none";
   scoreBox.style.display = "block";
   canvas.style.display = "block";
 
+  resetCamera();
   init();
   animate();
 }
@@ -325,7 +332,28 @@ function createConfetti() {
   scene.add(confetti);
   isCelebrating = true;
 
-  setTimeout(() => removeConfetti(), 5000);
+  setTimeout(() => {
+    removeConfetti();
+    endLevel(); // Tambahkan ini
+  }, 5000);
+}
+
+function endLevel() {
+  gameState = "intro";
+
+  // Sembunyikan canvas
+  canvas.style.display = "none";
+
+  // Munculkan soal dan tombol
+  questionBox.style.display = "block";
+  startBox.style.display = "block";
+
+  // Ganti tombol jadi "Next Level"
+  startBtn.textContent = "Next Level";
+
+  // Update soal untuk level berikutnya
+  generateQuestion(currentLevel);
+  updateQuestionUI();
 }
 
 function updateConfetti() {
