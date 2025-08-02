@@ -59,7 +59,6 @@ function init() {
   loadPlayer();
   loadGoals();
   createLabels();
-  generateQuestion(1);
   updateQuestionUI();
 }
 
@@ -359,7 +358,10 @@ function removeConfetti() {
   }
 }
 
-window.addEventListener("load", () => {
-  const q = document.getElementById("questionText");
-  if (q) q.textContent = "Tes muncul?";
+// Tambahkan ini di akhir JS file
+document.addEventListener("DOMContentLoaded", () => {
+  questionBox.style.display = "block";  // opsional, jika sempat di-hide
+  generateQuestion(currentLevel);
+  updateQuestionUI();
 });
+
