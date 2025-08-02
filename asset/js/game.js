@@ -295,9 +295,9 @@ function createBall() {
   ball = new THREE.Mesh(geometry, material);
 
   // Arahkan bola ke depan kanan player
-  const offsetX = 0.25;   // ke kanan (dari kaki kanan)
+  const offsetX = 0.3;   // ke kanan (dari kaki kanan)
   const offsetY = 0.2;    // setinggi kaki
-  const offsetZ = -0.3;   // sedikit di depan player
+  const offsetZ = 1;   // sedikit di depan player
   ball.position.set(player.position.x + offsetX, offsetY, player.position.z - offsetZ); 
 
   scene.add(ball);
