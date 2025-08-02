@@ -65,7 +65,7 @@ function init() {
   setupCamera();
   setupRenderer();
   setupLighting();
-  createBall();
+  // createBall();
   loadPlayer();
   loadGoals();
   createLabels();
