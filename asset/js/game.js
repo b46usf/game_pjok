@@ -1,7 +1,6 @@
 window.addEventListener("DOMContentLoaded", () => {
-  // === Scene Setup ===
+  // === Setup Scene, Camera, Renderer ===
   const scene = new THREE.Scene();
-
   const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -31,49 +30,30 @@ window.addEventListener("DOMContentLoaded", () => {
   scene.add(dirLight);
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
 
-  // === Sprite Karakter 2D ===
+  // === Sprite Player ===
   let player;
-
   const loader = new THREE.TextureLoader();
-  loader.load(
-    "asset/image/player.png",
-    (texture) => {
-      console.log("✅ Gambar berhasil dimuat");
+  loader.load("asset/image/player.png", (texture) => {
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    player = new THREE.Sprite(material);
+    player.scale.set(1.5, 3, 1);
+    player.position.set(0, 1.5, 6);
+    scene.add(player);
+  });
 
-      const material = new THREE.SpriteMaterial({
-        map: texture,
-        transparent: true,
-      });
-
-      player = new THREE.Sprite(material);
-      player.scale.set(1.5, 3, 1);
-      player.position.set(0, 1.5, 6); // Dimajukan dari 8 ke 6
-      scene.add(player);
-    },
-    undefined,
-    (error) => {
-      console.error("❌ Gagal memuat gambar:", error);
-    }
-  );
-
-  // === Bola (hanya ditambahkan setelah klik) ===
-  let ball;
-  let isKicked = false;
-  let velocity = new THREE.Vector3();
-
-  // === Gawang + Label Angka ===
+  // === Gawang & Label ===
   const goal1 = new THREE.Mesh(
     new THREE.BoxGeometry(10, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0xff6666 })
   );
-  goal1.position.set(10, 15, -25);
+  goal1.position.set(10, 0.5, -25);
   scene.add(goal1);
 
   const goal2 = new THREE.Mesh(
     new THREE.BoxGeometry(10, 2, 0.5),
     new THREE.MeshStandardMaterial({ color: 0x66ccff })
   );
-  goal2.position.set(-10, 15, -25);
+  goal2.position.set(-10, 0.5, -25);
   scene.add(goal2);
 
   function createLabel(text, color) {
@@ -95,15 +75,11 @@ window.addEventListener("DOMContentLoaded", () => {
     return sprite;
   }
 
-  const label3 = createLabel("3", "#c0392b");
-  label3.position.set(10, 16, -22);
-  scene.add(label3);
-
   const label4 = createLabel("4", "#2980b9");
-  label4.position.set(-10, 16, -22);
+  label4.position.set(-10, 2, -25); // Tinggi realistis
   scene.add(label4);
 
-  // === Kontrol Keyboard (Gerak horizontal sebelum ditendang) ===
+  // === Kontrol Pemain ===
   let moveDir = 0;
   document.addEventListener("keydown", (e) => {
     if (e.key === "ArrowLeft") moveDir = -1;
@@ -113,45 +89,62 @@ window.addEventListener("DOMContentLoaded", () => {
     if (e.key === "ArrowLeft" || e.key === "ArrowRight") moveDir = 0;
   });
 
-  // === Tembakan Bola ===
+  // === Bola ===
+  let ball, isKicked = false;
+  let velocity = new THREE.Vector3();
+  let elevation = 0;
+  let elevationSpeed = 0;
+  const gravity = 0.4;
+
+  // === Tembakan ===
   const shootBtn = document.getElementById("shootBtn");
-  if (shootBtn) {
-    shootBtn.addEventListener("click", () => {
-      if (!isKicked && player) {
-        isKicked = true;
-        player.scale.y = 2.8;
-        setTimeout(() => player.scale.y = 3, 100);
+  shootBtn.addEventListener("click", () => {
+    if (!isKicked && player) {
+      isKicked = true;
+      player.scale.y = 2.8;
+      setTimeout(() => player.scale.y = 3, 100);
 
-        // Tambahkan bola ke scene saat tombol ditekan
-        ball = new THREE.Mesh(
-          new THREE.SphereGeometry(0.5, 32, 32),
-          new THREE.MeshStandardMaterial({ color: 0xffffff })
-        );
-        ball.position.set(player.position.x, 0.5, player.position.z);
-        scene.add(ball);
+      ball = new THREE.Mesh(
+        new THREE.SphereGeometry(0.5, 32, 32),
+        new THREE.MeshStandardMaterial({ color: 0xffffff })
+      );
+      ball.position.set(player.position.x, 0.5, player.position.z);
+      elevation = 0.5;
+      elevationSpeed = 2.5;
+      scene.add(ball);
 
-        // === Hitung arah bola menuju label4 ===
-        const ballPos = ball.position.clone();
-        const goalPos = label4.position.clone();
-
-        const direction = new THREE.Vector3().subVectors(goalPos, ballPos).normalize();
-        const kickPower = 0.8;
-        velocity.copy(direction.multiplyScalar(kickPower));
-      }
-    });
-  }
+      // Arah ke label4
+      const from = new THREE.Vector3(ball.position.x, 0, ball.position.z);
+      const to = new THREE.Vector3(label4.position.x, 0, label4.position.z);
+      const dir = new THREE.Vector3().subVectors(to, from).normalize();
+      velocity.copy(dir.multiplyScalar(1.5)); // Power horizontal
+    }
+  });
 
   // === Game Loop ===
   function animate() {
     requestAnimationFrame(animate);
 
     if (!isKicked) {
-      if (player) player.position.x += moveDir * 0.1;
-      if (player) player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
+      if (player) {
+        player.position.x += moveDir * 0.1;
+        player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
+      }
     } else {
       if (ball) {
-        ball.position.add(velocity);
-        velocity.y -= 0.008; // Gravitasi
+        ball.position.x += velocity.x;
+        ball.position.z += velocity.z;
+
+        elevationSpeed -= gravity * 0.1;
+        elevation += elevationSpeed * 0.1;
+        ball.position.y = Math.max(0.5, elevation);
+
+        // Hentikan jika bola menyentuh tanah
+        if (elevation <= 0.5 && elevationSpeed < 0) {
+          isKicked = false;
+          elevationSpeed = 0;
+          velocity.set(0, 0, 0);
+        }
       }
     }
 
