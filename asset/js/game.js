@@ -144,7 +144,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       if (ball) {
         ball.position.add(velocity);
-        velocity.y -= 1;
+        velocity.y -= 0.1;
       }
     }
 
