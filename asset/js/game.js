@@ -214,23 +214,37 @@ function animate() {
 
 function updateGameLogic() {
   if (!isKicked && player) {
+    // Gerak kanan-kiri player
     player.position.x += moveDir * 0.1;
     player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
+
+    // Jika bola ada, posisinya ikut player (depan kaki kanan)
+    if (ball) {
+      const offsetX = 0.3;   // ke kanan dari player
+      const offsetY = 0.2;   // tinggi bola
+      const offsetZ = 1;     // sedikit di depan player
+      ball.position.set(player.position.x + offsetX, offsetY, player.position.z - offsetZ);
+    }
   } 
+  
   else if (isKicked && ball) {
+    // Gerakkan bola ke depan (z) dan kanan/kiri (x)
     ball.position.x += velocity.x;
     ball.position.z += velocity.z;
 
-    elevationSpeed -= gravity * 0.1;
-    elevation += elevationSpeed * 0.1;
-    ball.position.y = Math.max(0.5, elevation);
+    // Tetap di udara (tidak turun)
+    ball.position.y = 0.2;
 
-    // Reset bola saat menyentuh tanah
-    if (elevation <= 0.5 && elevationSpeed < 0) {
-      ball.position.set(player.position.x, 0.5, player.position.z - 1);
+    // Deteksi jika bola sudah melewati gawang (misalnya z < -20)
+    if (ball.position.z < -20) {
       isKicked = false;
-      elevationSpeed = 0;
       velocity.set(0, 0, 0);
+      
+      // Reset posisi bola ke depan kaki kanan player
+      const offsetX = 0.3;
+      const offsetY = 0.2;
+      const offsetZ = 1;
+      ball.position.set(player.position.x + offsetX, offsetY, player.position.z - offsetZ);
     }
   }
 }
