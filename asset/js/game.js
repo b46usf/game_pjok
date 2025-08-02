@@ -93,7 +93,6 @@ function init() {
   setupCamera();
   setupRenderer();
   setupLighting();
-  createBall();
   loadPlayer();
   loadGoals();
   createLabels();
@@ -140,6 +139,7 @@ function loadPlayer() {
     player.scale.set(1.5, 3, 1);
     player.position.set(0, 1.5, 6);
     scene.add(player);
+    createBall();
   });
 }
 
