@@ -288,7 +288,7 @@ function updateLabelTextures() {
 }
 
 function createBall() {
-  const geometry = new THREE.SphereGeometry(0.2, 32, 32); // ⬅️ radius diperbesar dari 0.2 ke 0.3
+  const geometry = new THREE.SphereGeometry(0.4, 32, 32); // ⬅️ radius diperbesar dari 0.2 ke 0.3
   const texture = new THREE.TextureLoader().load("asset/image/soccer-ball.png");
   const material = new THREE.MeshStandardMaterial({ map: texture });
 
