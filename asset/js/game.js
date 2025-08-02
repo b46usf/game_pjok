@@ -42,6 +42,34 @@ startBtn.addEventListener("click", () => {
   animate();
 });
 
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+canvas.addEventListener("mousedown", (event) => {
+  // Hitung posisi mouse dalam normalized device coordinates
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects([labelA, labelB]);
+
+  if (intersects.length > 0 && !isKicked && ball) {
+    const clickedLabel = intersects[0].object.name;
+
+    // Hitung arah tendangan ke label
+    const target = intersects[0].object.position.clone();
+    const direction = new THREE.Vector3().subVectors(target, ball.position).normalize();
+
+    velocity.copy(direction.multiplyScalar(0.5)); // Sesuaikan kecepatan bola
+    elevation = ball.position.y;
+    elevationSpeed = 1.5; // Kekuatan tendangan vertikal
+    isKicked = true;
+
+    // Simpan label yang ditendang untuk verifikasi jawaban
+    checkAnswerFromLabelHit(clickedLabel);
+  }
+});
+
 window.addEventListener("resize", () => {
   if (camera && renderer) {
     camera.aspect = window.innerWidth / window.innerHeight;
@@ -65,7 +93,7 @@ function init() {
   setupCamera();
   setupRenderer();
   setupLighting();
-  // createBall();
+  createBall();
   loadPlayer();
   loadGoals();
   createLabels();
@@ -189,16 +217,7 @@ function updateGameLogic() {
     player.position.x += moveDir * 0.1;
     player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
   } 
-  else if (isKicked) {
-    [labelA, labelB].forEach(label => {
-      const dist = ball.position.distanceTo(label.position);
-      if (dist < 1.5) {
-        checkAnswerFromLabelHit(label.name);
-        isKicked = false; // Hentikan pergerakan
-      }
-    });
-  }
-  else if (ball) {
+  else if (isKicked && ball) {
     ball.position.x += velocity.x;
     ball.position.z += velocity.z;
 
@@ -206,6 +225,7 @@ function updateGameLogic() {
     elevation += elevationSpeed * 0.1;
     ball.position.y = Math.max(0.5, elevation);
 
+    // Reset bola saat menyentuh tanah
     if (elevation <= 0.5 && elevationSpeed < 0) {
       ball.position.set(player.position.x, 0.5, player.position.z - 1);
       isKicked = false;
