@@ -10,6 +10,14 @@ let animationId;
 let currentQuestion = {};
 let currentLevel = 1;
 let labelA, labelB;
+let score = 0;
+const questions = {
+  1: { soal: "Angka Genap", jawaban: ["2", "3"], benar: "2" },
+  2: { soal: "Bilangan Prima", jawaban: ["4", "5"], benar: "5" },
+  3: { soal: "Kelipatan 3", jawaban: ["6", "7"], benar: "6" },
+  4: { soal: "Lebih besar dari 5", jawaban: ["4", "6"], benar: "6" },
+  5: { soal: "Kurang dari 10", jawaban: ["12", "8"], benar: "8" }
+};
 
 // === DOM Elements ===
 const canvas = document.getElementById("gameCanvas");
@@ -57,6 +65,7 @@ function init() {
   setupCamera();
   setupRenderer();
   setupLighting();
+  createBall();
   loadPlayer();
   loadGoals();
   createLabels();
@@ -179,7 +188,17 @@ function updateGameLogic() {
   if (!isKicked && player) {
     player.position.x += moveDir * 0.1;
     player.position.x = THREE.MathUtils.clamp(player.position.x, -5, 5);
-  } else if (ball) {
+  } 
+  else if (isKicked) {
+    [labelA, labelB].forEach(label => {
+      const dist = ball.position.distanceTo(label.position);
+      if (dist < 1.5) {
+        checkAnswerFromLabelHit(label.name);
+        isKicked = false; // Hentikan pergerakan
+      }
+    });
+  }
+  else if (ball) {
     ball.position.x += velocity.x;
     ball.position.z += velocity.z;
 
@@ -188,6 +207,7 @@ function updateGameLogic() {
     ball.position.y = Math.max(0.5, elevation);
 
     if (elevation <= 0.5 && elevationSpeed < 0) {
+      ball.position.set(player.position.x, 0.5, player.position.z - 1);
       isKicked = false;
       elevationSpeed = 0;
       velocity.set(0, 0, 0);
@@ -196,54 +216,18 @@ function updateGameLogic() {
 }
 
 function generateQuestion(level = 1) {
-  let a, b, operator, correctAnswer;
-
-  switch (level) {
-    case 1:
-      a = Math.floor(Math.random() * 9) + 1;
-      b = Math.floor(Math.random() * 9) + 1;
-      operator = '+';
-      correctAnswer = a + b;
-      break;
-    case 2:
-      a = Math.floor(Math.random() * 90) + 10;
-      b = Math.floor(Math.random() * 90) + 10;
-      operator = '+';
-      correctAnswer = a + b;
-      break;
-    case 3:
-      a = Math.floor(Math.random() * 9) + 1;
-      b = Math.floor(Math.random() * 9) + 1;
-      operator = '×';
-      correctAnswer = a * b;
-      break;
-    case 4:
-      a = Math.floor(Math.random() * 90) + 10;
-      b = Math.floor(Math.random() * 9) + 1;
-      operator = '×';
-      correctAnswer = a * b;
-      break;
-    default: // level 5
-      a = Math.floor(Math.random() * 20) + 1;
-      b = Math.floor(Math.random() * 10) + 1;
-      operator = ['+', '×'][Math.floor(Math.random() * 2)];
-      correctAnswer = operator === '+' ? a + b : a * b;
-  }
-
-  // Jawaban salah (random dan tidak sama)
-  let wrongAnswer;
-  do {
-    wrongAnswer = correctAnswer + (Math.floor(Math.random() * 10) - 5);
-  } while (wrongAnswer === correctAnswer);
-
-  // Acak posisi label jawaban
+  const data = questions[level];
   const isCorrectLeft = Math.random() < 0.5;
+  const correctIndex = data.jawaban.indexOf(data.benar);
+  const wrongIndex = correctIndex === 0 ? 1 : 0;
 
   currentQuestion = {
-    question: `${a} ${operator} ${b}`,
-    correctAnswer,
-    options: isCorrectLeft ? [correctAnswer, wrongAnswer] : [wrongAnswer, correctAnswer],
-    correctLabel: isCorrectLeft ? 'A' : 'B'
+    question: data.soal,
+    correctAnswer: data.benar,
+    options: isCorrectLeft
+      ? [data.jawaban[correctIndex], data.jawaban[wrongIndex]]
+      : [data.jawaban[wrongIndex], data.jawaban[correctIndex]],
+    correctLabel: isCorrectLeft ? "A" : "B"
   };
 }
 
@@ -261,7 +245,7 @@ function checkAnswerFromLabelHit(hitLabel) {
   }
 
   // Ganti soal baru
-  currentLevel = Math.min(5, Math.floor(score / 3) + 1); // naik tiap 3 skor
+  currentLevel = Math.min(5, Math.floor(score / 1) + 1);
   generateQuestion(currentLevel);
   updateQuestionUI();
 }
@@ -283,7 +267,15 @@ function updateLabelTextures() {
   });
 }
 
+function createBall() {
+  const geometry = new THREE.SphereGeometry(0.4, 32, 32);
+  const texture = new THREE.TextureLoader().load("asset/image/soccer-ball.png");
+  const material = new THREE.MeshStandardMaterial({ map: texture });
+  ball = new THREE.Mesh(geometry, material);
+  ball.position.set(player.position.x, 0.5, player.position.z - 1);
+  scene.add(ball);
+}
 
-// === Optional Shoot Mechanism ===
-// Tambahkan event listener shootBtn jika diperlukan
-// dan arahkan ke target label (ex: label4)
+function updateScoreUI() {
+  document.getElementById("score").textContent = score;
+}

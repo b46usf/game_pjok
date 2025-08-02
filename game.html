@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Mulai Game - Tendangan Juara</title>
-  <link rel="icon" type="image/png" href="asset/image/logo-soccer-ball.png">
+  <title>Tendangan Juara</title>
+  <link rel="icon" href="asset/image/logo-soccer-ball.png" type="image/png" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.min.js"></script>
   <style>
@@ -17,7 +17,7 @@
       background-size: cover;
     }
 
-    #gameCanvas  {
+    #gameCanvas {
       display: none;
       position: absolute;
       top: 0;
@@ -32,54 +32,47 @@
     }
 
     @media (orientation: portrait) {
-      .landscape-only {
-        display: none;
-      }
-      .portrait-warning {
-        display: flex;
-      }
+      .landscape-only { display: none; }
+      .portrait-warning { display: flex; }
     }
   </style>
 </head>
 <body class="bg-sky-200 font-fredoka relative">
 
-  <!-- Peringatan jika tidak landscape -->
+  <!-- Peringatan Portrait -->
   <div class="portrait-warning fixed inset-0 z-50 items-center justify-center bg-white text-center px-6">
     <div class="text-blue-800">
       <h2 class="text-2xl font-bold mb-2">Putar perangkatmu!</h2>
-      <p class="text-lg">Game ini lebih seru dimainkan dalam mode <strong>landscape</strong> (horizontal) 📱🔄</p>
+      <p class="text-lg">Mainkan dalam mode <strong>landscape</strong> 📱🔄</p>
     </div>
   </div>
 
-  <!-- HUD -->
-  <div class="landscape-only fixed top-[2vh] left-[2vw] z-10 bg-white/80 px-4 py-2 rounded-xl shadow max-w-[90vw]">
+  <!-- Skor -->
+  <div id="scoreBox" class="landscape-only fixed top-[2vh] left-[2vw] z-10 bg-white/80 px-4 py-2 rounded-xl shadow max-w-[90vw]" style="display: none;">
     <h2 class="font-bold text-xl text-blue-800">Skor: <span id="score">0</span></h2>
   </div>
 
-  <!-- Soal (Tambahkan id) -->
+  <!-- Soal -->
   <div id="questionBox" class="landscape-only absolute top-4 right-4 z-10 bg-white/90 px-4 py-2 rounded-xl shadow text-center max-w-[90vw] sm:max-w-xs">
     <p class="text-blue-800 font-semibold">
-      Arahkan bola ke gawang yang bertuliskan: <span id="questionText" class="font-bold">Angka Genap</span>
+      Arahkan bola ke gawang yang bertuliskan: <span id="questionText" class="font-bold">...</span>
     </p>
   </div>
 
-  <!-- Tombol Mulai (Tambahkan id) -->
+  <!-- Tombol Mulai -->
   <div id="startBox" class="landscape-only fixed bottom-[15vh] left-1/2 transform -translate-x-1/2 z-10">
-    <button id="startBtn" class="bg-green-600 text-white px-6 py-3 rounded-full shadow hover:bg-green-700 transition text-xl font-bold touch-none pointer-events-auto select-none">
-      🥅 Mulai!
-    </button>
+    <button id="startBtn" class="bg-green-600 text-white px-6 py-3 rounded-full shadow hover:bg-green-700 transition text-xl font-bold">🥅 Mulai!</button>
   </div>
 
-  <!-- Tombol Kembali -->
+  <!-- Kembali -->
   <div class="landscape-only absolute bottom-4 left-4 z-10">
-    <a href="index.html" class="bg-yellow-400 text-blue-900 px-4 py-2 rounded-full shadow hover:bg-yellow-500 font-semibold">
-      ⬅ Kembali
-    </a>
+    <a href="index.html" class="bg-yellow-400 text-blue-900 px-4 py-2 rounded-full shadow hover:bg-yellow-500 font-semibold">⬅ Kembali</a>
   </div>
 
-  <!-- Canvas Three.js -->
-  <canvas id="gameCanvas" class="absolute inset-0 z-0"></canvas>
+  <!-- Canvas -->
+  <canvas id="gameCanvas"></canvas>
 
+  <!-- Game Logic -->
   <script src="asset/js/game.js"></script>
 </body>
 </html>
