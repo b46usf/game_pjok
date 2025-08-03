@@ -1,5 +1,3 @@
-// gameEffect/sceneSetup.js
-import * as THREE from 'three';
 import { DEFAULT_CAMERA_POS } from './gameCore.js';
 
 export let scene, camera, renderer;
