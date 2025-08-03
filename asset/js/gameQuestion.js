@@ -1,4 +1,4 @@
-import { labelA, labelB } from './gameCore.js';
+import { getLabelA, getLabelB } from './gameCore.js';
 import { drawLabelToCanvas } from './gameUtils.js';
 
 // === Static Question Data ===
@@ -10,11 +10,8 @@ const questions = {
   5: { soal: "Kurang dari 10", jawaban: ["12", "8"], benar: "8" }
 };
 
-// === Mutable State ===
 let currentLevel = 1;
 let currentQuestion = {};
-
-// === Public API ===
 
 export function generateQuestion(level = currentLevel) {
   const data = questions[level];
@@ -46,6 +43,24 @@ export function updateQuestionUI() {
   updateLabelTextures();
 }
 
+function updateLabelTextures() {
+  const labelA = getLabelA();
+  const labelB = getLabelB();
+
+  if (!labelA || !labelB || !currentQuestion.options) return;
+
+  const labels = [labelA, labelB];
+  labels.forEach((label, i) => {
+    drawLabelToCanvas(
+      label.updateCtx,
+      currentQuestion.options[i],
+      i === 0 ? "#1900FF" : "#FF0040"
+    );
+    label.texture.needsUpdate = true;
+  });
+}
+
+// Public
 export function prepareNextLevel() {
   generateQuestion(currentLevel);
   updateQuestionUI();
@@ -65,20 +80,4 @@ export function getCurrentLevel() {
 
 export function getCurrentQuestion() {
   return currentQuestion;
-}
-
-// === Internal Helpers ===
-
-function updateLabelTextures() {
-  if (!labelA || !labelB || !currentQuestion.options) return;
-
-  const labels = [labelA, labelB];
-  labels.forEach((label, i) => {
-    drawLabelToCanvas(
-      label.updateCtx,
-      currentQuestion.options[i],
-      i === 0 ? "#1900FF" : "#FF0040"
-    );
-    label.texture.needsUpdate = true;
-  });
 }

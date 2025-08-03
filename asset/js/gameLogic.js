@@ -1,5 +1,5 @@
 import {
-  player, ball, velocity, gravity, camera, resetBallPosition
+  player, ball, velocity, camera, resetBallPosition
 } from './gameObjects.js';
 
 import {
@@ -14,6 +14,8 @@ import {
 } from './gameCore.js';
 
 import { toggleGameplayVisibility, showResultFeedback, updateScoreUI } from './gameUI.js';
+
+const gravity = 0.4;
 
 let moveDir = 0;
 let elevation = 0;
