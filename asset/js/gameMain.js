@@ -36,7 +36,7 @@ import {
 
 import { onWindowResize } from './gameObjects.js';
 import { updateConfetti, removeConfetti } from './gameUtils.js';
-import { resetGameState, gameState } from './gameCore.js';
+import { resetGameState, getGameState } from './gameCore.js';
 
 // === Inisialisasi saat DOM siap ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -61,7 +61,7 @@ function initGameMain() {
 // === Fungsi Start Game ===
 function startGame() {
   // Cegah duplikasi atau restart di tengah game
-  if (gameState !== "intro") return;
+  if (getGameState !== "intro") return;
 
   // Bersihkan confetti lama (jika ada)
   removeConfetti();
