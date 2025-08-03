@@ -9,6 +9,7 @@ export let cinematicProgress = 0;
 export let hasCinematicEnded = false;
 export let cinematicEndTime = 0;
 export let isCelebrating = false;
+export const DEFAULT_CAMERA_POS = new THREE.Vector3(0, 5, 12);
 
 // === Label References ===
 export let labelA = null;
