@@ -20,6 +20,9 @@ let gameState = "intro"; // "intro", "playing", "celebrating"
 let goal1, goal2;
 let feedbackSprite = null;
 let isAnswerChecked = false;
+let hasCinematicEnded = false;
+let cinematicEndTime = 0;
+
 
 // === Questions Data ===
 const questions = {
@@ -224,17 +227,23 @@ function updateGameLogic() {
   if (!isKicked && player && ball) {
     player.position.x = THREE.MathUtils.clamp(player.position.x + moveDir * 0.1, -5, 5);
     resetBallPosition();
-  } else if (isKicked && ball) {
+    return;
+  }
+
+  if (isKicked && ball) {
+    // Masuk slow motion saat bola melewati z = -10
     if (ball.position.z < -10 && !isSlowMotion) {
       isSlowMotion = true;
-      velocity.multiplyScalar(0.3);
+      velocity.multiplyScalar(0.3); // Kurangi kecepatan bola
     }
 
+    // Pergerakan bola
     ball.position.add(velocity);
     elevationSpeed -= gravity;
     elevation += elevationSpeed;
     ball.position.y = Math.max(elevation, 0.2);
 
+    // Kamera cinematic mengikuti bola
     if (cinematicProgress < 1) {
       cinematicProgress += isSlowMotion ? 0.003 : 0.01;
       const targetCamPos = new THREE.Vector3(
@@ -244,24 +253,33 @@ function updateGameLogic() {
       );
       camera.position.lerp(targetCamPos, isSlowMotion ? 0.02 : 0.05);
       camera.lookAt(ball.position);
+    } else {
+      // cinematic selesai
+      if (!hasCinematicEnded) {
+        hasCinematicEnded = true;
+        cinematicEndTime = performance.now(); // Catat waktu selesai sinematik
+      }
     }
 
-    // 🔥 Cek jika animasi sinematik selesai & belum cek jawaban
-    if (cinematicProgress >= 1 && ball.position.z <= -19 && isAnswerChecked && !isCelebrating) {
-      const { isCorrect } = isAnswerChecked;
+    // Delay 1 detik setelah cinematic selesai sebelum cek jawaban
+    if (hasCinematicEnded && performance.now() - cinematicEndTime > 1000 && !isCelebrating) {
+      if (isAnswerChecked) {
+        const { isCorrect } = isAnswerChecked;
 
-      toggleGameplayVisibility(false);
-      resetBallPhysics();
+        toggleGameplayVisibility(false);
+        resetBallPhysics();
 
-      if (isCorrect) {
-        score++;
-        updateScoreUI();
-        showResultFeedback(true);
-      } else {
-        showResultFeedback(false);
+        if (isCorrect) {
+          score++;
+          updateScoreUI();
+          showResultFeedback(true);
+        } else {
+          showResultFeedback(false);
+        }
+
+        isAnswerChecked = false;
+        isCelebrating = true;
       }
-
-      isAnswerChecked = false; // reset
     }
   }
 }
@@ -450,10 +468,7 @@ function showFeedback(isCorrect, callback) {
 
 function endGame() {
   toggleGameplayVisibility(false);
-  isKicked = false;
-  isSlowMotion = false;
-  cinematicProgress = 0;
-  velocity.set(0, 0, 0);
+  resetBallPhysics();
 
   canvas.style.display = "none";
   questionBox.style.display = "none";
@@ -476,6 +491,9 @@ function resetBallPhysics() {
   isKicked = false;
   isSlowMotion = false;
   cinematicProgress = 0;
+  hasCinematicEnded = false;
+  cinematicEndTime = 0;
+  isCelebrating = false;
   velocity.set(0, 0, 0);
 }
 
