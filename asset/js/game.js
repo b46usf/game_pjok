@@ -19,6 +19,7 @@ const DEFAULT_CAMERA_POS = new THREE.Vector3(0, 5, 12);
 let gameState = "intro"; // "intro", "playing", "celebrating"
 let goal1, goal2;
 let feedbackSprite = null;
+let isAnswerChecked = false;
 
 // === Questions Data ===
 const questions = {
@@ -234,7 +235,6 @@ function updateGameLogic() {
     elevation += elevationSpeed;
     ball.position.y = Math.max(elevation, 0.2);
 
-
     if (cinematicProgress < 1) {
       cinematicProgress += isSlowMotion ? 0.003 : 0.01;
       const targetCamPos = new THREE.Vector3(
@@ -244,6 +244,24 @@ function updateGameLogic() {
       );
       camera.position.lerp(targetCamPos, isSlowMotion ? 0.02 : 0.05);
       camera.lookAt(ball.position);
+    }
+
+    // 🔥 Cek jika animasi sinematik selesai & belum cek jawaban
+    if (cinematicProgress >= 1 && ball.position.z <= -19 && isAnswerChecked && !isCelebrating) {
+      const { isCorrect } = isAnswerChecked;
+
+      toggleGameplayVisibility(false);
+      resetBallPhysics();
+
+      if (isCorrect) {
+        score++;
+        updateScoreUI();
+        showResultFeedback(true);
+      } else {
+        showResultFeedback(false);
+      }
+
+      isAnswerChecked = false; // reset
     }
   }
 }
@@ -270,6 +288,12 @@ function updateQuestionUI() {
 
 function checkAnswerFromLabelHit(hitLabel) {
   const isCorrect = hitLabel === currentQuestion.correctLabel;
+
+  // Simpan dulu hasilnya, nanti dieksekusi setelah animasi sinematik
+  isAnswerChecked = {
+    isCorrect: isCorrect
+  };
+
   toggleGameplayVisibility(false);
   resetBallPhysics();
 
