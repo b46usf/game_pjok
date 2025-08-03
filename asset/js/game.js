@@ -19,7 +19,7 @@ const DEFAULT_CAMERA_POS = new THREE.Vector3(0, 5, 12);
 let gameState = "intro"; // "intro", "playing", "celebrating"
 let goal1, goal2;
 let feedbackSprite = null;
-let isAnswerChecked = false;
+
 let hasCinematicEnded = false;
 let cinematicEndTime = 0;
 let answerResult = null;
@@ -70,6 +70,12 @@ function startGame() {
 }
 
 function init() {
+  if (scene) {
+    // Buang semua object yang ada sebelumnya (opsional)
+    while (scene.children.length > 0) {
+      scene.remove(scene.children[0]);
+    }
+  }
   setupScene();
   setupCamera();
   setupRenderer();
@@ -276,7 +282,7 @@ function updateGameLogic() {
         updateScoreUI();
       }
 
-      isAnswerChecked = false;
+      
       answerResult = null;
       isCelebrating = true;
     }
@@ -308,15 +314,15 @@ function checkAnswerFromLabelHit(hitLabel) {
 
   // Simpan dulu hasilnya, nanti dieksekusi setelah animasi sinematik
   answerResult = { isCorrect };
-  isAnswerChecked = true;
+  
 
-  if (isCorrect) {
+  /* if (isCorrect) {
     score++;
     updateScoreUI();
     showResultFeedback(true);
   } else {
     showResultFeedback(false);
-  }
+  } */
 }
 
 function showResultFeedback(isCorrect) {
@@ -442,23 +448,30 @@ function showFeedback(isCorrect, callback) {
   const textureLoader = new THREE.TextureLoader();
   const texturePath = isCorrect ? "asset/image/check.png" : "asset/image/wrong.png";
 
-  textureLoader.load(texturePath, (texture) => {
-    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
-    feedbackSprite = new THREE.Sprite(material);
-    feedbackSprite.scale.set(2, 2, 1);
-    feedbackSprite.position.set(0, 5, -10);
-    scene.add(feedbackSprite);
+  textureLoader.load(
+    texturePath,
+    (texture) => {
+      const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+      feedbackSprite = new THREE.Sprite(material);
+      feedbackSprite.scale.set(2, 2, 1);
+      feedbackSprite.position.set(0, 5, -10);
+      scene.add(feedbackSprite);
 
-    setTimeout(() => {
-      if (feedbackSprite) {
-        scene.remove(feedbackSprite);
-        feedbackSprite.material.dispose();
-        feedbackSprite = null;
-      }
-
-      if (typeof callback === "function") callback();
-    }, 2500);
-  });
+      setTimeout(() => {
+        if (feedbackSprite) {
+          scene.remove(feedbackSprite);
+          feedbackSprite.material.dispose();
+          feedbackSprite = null;
+        }
+        if (typeof callback === "function") callback();
+      }, 2500);
+    },
+    undefined,
+    (err) => {
+      console.warn("Gagal memuat feedback sprite:", err);
+      if (typeof callback === "function") callback(); // tetap lanjut
+    }
+  );
 }
 
 function endGame() {
@@ -478,6 +491,7 @@ function endGame() {
   startBox.appendChild(congrats);
 
   startBtn.onclick = () => {
+    startBtn.disabled = true;
     window.location.href = "index.html";
   };
 }
@@ -490,6 +504,7 @@ function resetBallPhysics() {
   cinematicEndTime = 0;
   isCelebrating = false;
   velocity.set(0, 0, 0);
+  if (ball && player) resetBallPosition();
 }
 
 function drawLabelToCanvas(ctx, text, bgColor) {
