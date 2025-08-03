@@ -1,28 +1,36 @@
-// === Scene ===
-function setupScene() {
+import { DEFAULT_CAMERA_POS } from './gameCore.js';
+import { drawLabelToCanvas } from './gameUtils.js';
+
+// === GLOBAL OBJECTS ===
+export let scene, camera, renderer;
+export let player, ball, goal1, goal2;
+export let labelA, labelB;
+
+// === SCENE ===
+export function setupScene() {
   scene = new THREE.Scene();
 }
 
-// === Camera ===
-function setupCamera() {
+// === CAMERA ===
+export function setupCamera() {
   camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
   resetCamera();
 }
 
-function resetCamera() {
+export function resetCamera() {
   if (!camera) return;
   camera.position.copy(DEFAULT_CAMERA_POS);
-  camera.lookAt(new THREE.Vector3(0, 1.5, 0)); // Fokus ke pemain
+  camera.lookAt(new THREE.Vector3(0, 1.5, 0));
 }
 
-// === Renderer ===
-function setupRenderer() {
+// === RENDERER ===
+export function setupRenderer(canvas) {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// === Lighting ===
-function setupLighting() {
+// === LIGHTING ===
+export function setupLighting() {
   const dirLight = new THREE.DirectionalLight(0xffffff, 1);
   dirLight.position.set(10, 10, 10);
   scene.add(dirLight);
@@ -31,8 +39,8 @@ function setupLighting() {
   scene.add(ambient);
 }
 
-// === Player ===
-function loadPlayer() {
+// === PLAYER & BALL ===
+export function loadPlayer() {
   const loader = new THREE.TextureLoader();
   loader.load("asset/image/player.png", (texture) => {
     const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
@@ -40,11 +48,10 @@ function loadPlayer() {
     player.scale.set(1.5, 3, 1);
     player.position.set(0, 1.5, 6);
     scene.add(player);
-    createBall();
+    createBall(); // Ball created only after player is loaded
   });
 }
 
-// === Ball ===
 function createBall() {
   const geometry = new THREE.SphereGeometry(0.3, 32, 32);
   const texture = new THREE.TextureLoader().load("asset/image/soccer-ball.png");
@@ -54,13 +61,13 @@ function createBall() {
   scene.add(ball);
 }
 
-function resetBallPosition() {
+export function resetBallPosition() {
   if (!ball || !player) return;
   ball.position.set(player.position.x + 0.3, 0.2, player.position.z - 1);
 }
 
-// === Goal ===
-function loadGoals() {
+// === GOALS ===
+export function loadGoals() {
   const loader = new THREE.TextureLoader();
   loader.load("asset/image/goal.png", (goalTexture) => {
     const material = new THREE.MeshBasicMaterial({
@@ -79,8 +86,8 @@ function loadGoals() {
   });
 }
 
-// === Labels ===
-function createLabels() {
+// === LABELS ===
+export function createLabels() {
   labelA = createLabel("A", "#1900FF", -10);
   labelB = createLabel("B", "#FF0040", 10);
   console.log("Label A & B created", labelA, labelB);
@@ -101,6 +108,7 @@ function createLabel(name, color, xPosition) {
   sprite.name = name;
   sprite.position.set(xPosition, 8, -25);
 
+  // Tambahkan properti untuk update label
   sprite.updateCtx = ctx;
   sprite.updateCanvas = canvas;
   sprite.texture = texture;
