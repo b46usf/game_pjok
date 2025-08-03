@@ -61,7 +61,7 @@ function initGameMain() {
 // === Fungsi Start Game ===
 function startGame() {
   // Cegah duplikasi atau restart di tengah game
-  if (getGameState !== "intro") return;
+  if (getGameState() !== "intro") return;
 
   // Bersihkan confetti lama (jika ada)
   removeConfetti();
