@@ -16,15 +16,27 @@ import {
   loadGoals,
   createLabels,
   scene,
-  renderer,
   camera,
+  renderer,
 } from './gameObjects.js';
 
-import { onCanvasClick, onKeyDown, onKeyUp, updateGameLogic } from './gameLogic.js';
-import { prepareNextLevel } from './gameQuestion.js';
+import {
+  onCanvasClick,
+  onKeyDown,
+  onKeyUp,
+  updateGameLogic,
+  resetBallPhysics,
+  checkAnswerFromLabelHit,
+} from './gameLogic.js';
+
+import {
+  prepareNextLevel,
+  updateQuestionUI,
+} from './gameQuestion.js';
+
 import { onWindowResize } from './gameObjects.js';
-import { updateConfetti } from './gameUtils.js';
-import { resetGameState } from './gameCore.js';
+import { updateConfetti, removeConfetti } from './gameUtils.js';
+import { resetGameState, gameState } from './gameCore.js';
 
 // === Inisialisasi saat DOM siap ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -34,10 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (canvas) canvas.style.display = "none";
 
   prepareNextLevel(); // Set soal awal
-  initGameMain();
+  initGameMain();     // Binding event
 });
 
-// === Event Binding Terpisah ===
+// === Event Binding ===
 function initGameMain() {
   if (startBtn) startBtn.addEventListener("click", startGame);
   if (canvas) canvas.addEventListener("mousedown", onCanvasClick);
@@ -48,6 +60,17 @@ function initGameMain() {
 
 // === Fungsi Start Game ===
 function startGame() {
+  // Cegah duplikasi atau restart di tengah game
+  if (gameState !== "intro") return;
+
+  // Bersihkan confetti lama (jika ada)
+  removeConfetti();
+
+  // Bersihkan pesan congrats lama jika ada
+  const congrats = document.getElementById("congratsText");
+  if (congrats) congrats.remove();
+
+  // Setup scene baru
   setupScene();
   setupCamera();
   setupRenderer(canvas);
@@ -56,13 +79,18 @@ function startGame() {
   loadGoals();
   createLabels();
 
+  // Reset & mulai ulang semua status game
   resetGameState();
+  updateQuestionUI();
+
   toggleGameplayVisibility(true);
 
-  canvas.style.display = "block";
+  questionBox.style.display = "none";
+  startBox.style.display = "none";
   scoreBox.style.display = "block";
+  canvas.style.display = "block";
 
-  animate();
+  animate(); // mulai loop
 }
 
 // === Game Loop ===
