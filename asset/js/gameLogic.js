@@ -146,3 +146,9 @@ function checkCinematicEnd() {
 export function getScore() {
   return score;
 }
+
+export function checkAnswerFromLabelHit(hitLabel) {
+  const isCorrect = hitLabel === currentQuestion.correctLabel;
+
+  answerResult = { isCorrect };
+}

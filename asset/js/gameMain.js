@@ -25,8 +25,8 @@ import {
   onKeyDown,
   onKeyUp,
   updateGameLogic,
-  resetBallPhysics,
-  checkAnswerFromLabelHit,
+  /* resetBallPhysics,
+  checkAnswerFromLabelHit, */
 } from './gameLogic.js';
 
 import {
