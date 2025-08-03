@@ -1,5 +1,5 @@
 import {
-  player, ball, velocity, camera, resetBallPosition
+  player, ball, camera, resetBallPosition
 } from './gameObjects.js';
 
 import {
@@ -16,6 +16,7 @@ import {
 import { toggleGameplayVisibility, showResultFeedback, updateScoreUI } from './gameUI.js';
 
 const gravity = 0.4;
+const velocity = new THREE.Vector3();
 
 let moveDir = 0;
 let elevation = 0;
