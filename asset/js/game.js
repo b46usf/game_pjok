@@ -314,9 +314,6 @@ function checkAnswerFromLabelHit(hitLabel) {
   answerResult = { isCorrect };
   isAnswerChecked = true;
 
-  toggleGameplayVisibility(false);
-  resetBallPhysics();
-
   if (isCorrect) {
     score++;
     updateScoreUI();
