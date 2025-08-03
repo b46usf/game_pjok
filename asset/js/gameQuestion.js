@@ -1,6 +1,6 @@
 // gameQuestion.js
 import { labelA, labelB } from './gameCore.js';
-import { drawLabelToCanvas } from './gameUI.js';
+import { drawLabelToCanvas } from './gameUtils.js';
 
 export const questions = {
   1: { soal: "Angka Genap", jawaban: ["2", "3"], benar: "2" },
