@@ -4,12 +4,12 @@ import {
   questionBox,
   startBox,
   scoreBox,
-  onWindowResize,
 } from './gameUI.js';
 
 import { onCanvasClick, onKeyDown, onKeyUp } from './gameLogic.js';
 import { prepareNextLevel } from './gameQuestion.js';
 import { startGame } from './gameUtils.js';
+import { onWindowResize } from './gameObjects.js';
 
 // === Inisialisasi saat DOM siap ===
 document.addEventListener("DOMContentLoaded", () => {

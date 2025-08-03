@@ -116,3 +116,10 @@ function createLabel(name, color, xPosition) {
   scene.add(sprite);
   return sprite;
 }
+
+export function onWindowResize() {
+  if (!renderer || !camera) return;
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
