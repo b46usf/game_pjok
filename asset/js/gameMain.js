@@ -4,12 +4,27 @@ import {
   questionBox,
   startBox,
   scoreBox,
+  toggleGameplayVisibility,
 } from './gameUI.js';
 
-import { onCanvasClick, onKeyDown, onKeyUp } from './gameLogic.js';
+import {
+  setupScene,
+  setupCamera,
+  setupRenderer,
+  setupLighting,
+  loadPlayer,
+  loadGoals,
+  createLabels,
+  scene,
+  renderer,
+  camera,
+} from './gameObjects.js';
+
+import { onCanvasClick, onKeyDown, onKeyUp, updateGameLogic } from './gameLogic.js';
 import { prepareNextLevel } from './gameQuestion.js';
-import { startGame } from './gameUtils.js';
 import { onWindowResize } from './gameObjects.js';
+import { updateConfetti } from './gameUtils.js';
+import { resetGameState } from './gameCore.js';
 
 // === Inisialisasi saat DOM siap ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -29,4 +44,33 @@ function initGameMain() {
   window.addEventListener("resize", onWindowResize);
   document.addEventListener("keydown", onKeyDown);
   document.addEventListener("keyup", onKeyUp);
+}
+
+// === Fungsi Start Game ===
+function startGame() {
+  setupScene();
+  setupCamera();
+  setupRenderer(canvas);
+  setupLighting();
+  loadPlayer();
+  loadGoals();
+  createLabels();
+
+  resetGameState();
+  toggleGameplayVisibility(true);
+
+  canvas.style.display = "block";
+  scoreBox.style.display = "block";
+
+  animate();
+}
+
+// === Game Loop ===
+function animate() {
+  requestAnimationFrame(animate);
+
+  updateGameLogic();
+  updateConfetti();
+
+  renderer.render(scene, camera);
 }
