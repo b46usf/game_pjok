@@ -1,5 +1,18 @@
-import { player, ball, velocity, gravity, camera, resetBallPosition } from './gameObjects.js';
-import * as GameState from './gameCore.js';
+import {
+  player, ball, velocity, gravity, camera, resetBallPosition
+} from './gameObjects.js';
+
+import {
+  getLabelA, getLabelB,
+  getIsKicked, setIsKicked,
+  getCurrentQuestion, getAnswerResult,
+  getIsCelebrating, setIsCelebrating,
+  getCinematicProgress, setCinematicProgress,
+  getHasCinematicEnded, setCinematicEnded, getCinematicEndTime,
+  setIsSlowMotion, getIsSlowMotion,
+  resetGameState
+} from './gameCore.js';
+
 import { toggleGameplayVisibility, showResultFeedback, updateScoreUI } from './gameUI.js';
 
 let moveDir = 0;
@@ -24,9 +37,9 @@ export function onCanvasClick(event) {
 
   const raycaster = new THREE.Raycaster();
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects([GameState.labelA, GameState.labelB]);
 
-  if (intersects.length === 0 || GameState.isKicked || !ball) return;
+  const intersects = raycaster.intersectObjects([getLabelA(), getLabelB()]);
+  if (intersects.length === 0 || getIsKicked() || !ball) return;
 
   const clickedLabel = intersects[0].object.name;
   const direction = new THREE.Vector3().subVectors(intersects[0].object.position, ball.position).normalize();
@@ -34,33 +47,32 @@ export function onCanvasClick(event) {
   velocity.copy(direction.multiplyScalar(0.5));
   elevation = ball.position.y;
   elevationSpeed = 1.5;
-  GameState.isKicked = true;
+  setIsKicked(true);
 
   checkAnswer(clickedLabel);
 }
 
 function checkAnswer(label) {
-  GameState.answerResult.isCorrect = label === GameState.currentQuestion.correctLabel;
+  const result = getAnswerResult();
+  result.isCorrect = label === getCurrentQuestion().correctLabel;
 }
 
 export function updateGameLogic() {
-  if (!GameState.isKicked && player && ball) {
+  if (!getIsKicked() && player && ball) {
     updatePlayerMovement();
     return;
   }
 
-  if (GameState.isKicked && ball) {
+  if (getIsKicked() && ball) {
     updateBallMovement();
     updateCinematicCamera();
+    checkCinematicEnd();
 
-    if (!GameState.hasCinematicEnded && GameState.cinematicProgress >= 1) {
-      GameState.hasCinematicEnded = true;
-      GameState.cinematicEndTime = performance.now();
-    }
-
-    if (GameState.hasCinematicEnded &&
-        performance.now() - GameState.cinematicEndTime > 1000 &&
-        !GameState.isCelebrating) {
+    if (
+      getHasCinematicEnded() &&
+      performance.now() - getCinematicEndTime() > 1000 &&
+      !getIsCelebrating()
+    ) {
       handlePostCinematic();
     }
   }
@@ -72,8 +84,8 @@ function updatePlayerMovement() {
 }
 
 function updateBallMovement() {
-  if (ball.position.z < -10 && !GameState.isSlowMotion) {
-    GameState.isSlowMotion = true;
+  if (ball.position.z < -10 && !getIsSlowMotion()) {
+    setIsSlowMotion(true);
     velocity.multiplyScalar(0.3);
   }
 
@@ -84,45 +96,48 @@ function updateBallMovement() {
 }
 
 function updateCinematicCamera() {
-  if (GameState.cinematicProgress < 1) {
-    GameState.cinematicProgress += GameState.isSlowMotion ? 0.003 : 0.01;
+  let progress = getCinematicProgress();
+  if (progress < 1) {
+    progress += getIsSlowMotion() ? 0.003 : 0.01;
+    setCinematicProgress(progress);
 
     const target = new THREE.Vector3(
       ball.position.x,
-      5 + GameState.cinematicProgress * 3,
-      ball.position.z + 8 - GameState.cinematicProgress * 6
+      5 + progress * 3,
+      ball.position.z + 8 - progress * 6
     );
 
-    camera.position.lerp(target, GameState.isSlowMotion ? 0.02 : 0.05);
+    camera.position.lerp(target, getIsSlowMotion() ? 0.02 : 0.05);
     camera.lookAt(ball.position);
   }
 }
 
 function handlePostCinematic() {
-  const { isCorrect } = GameState.answerResult;
+  const isCorrect = getAnswerResult().isCorrect;
 
   toggleGameplayVisibility(false);
   resetBallPhysics();
-  showResultFeedback(isCorrect);
 
-  if (isCorrect) {
-    score++;
-    updateScoreUI(score);
-  }
+  showResultFeedback(isCorrect).then(() => {
+    if (isCorrect) {
+      score++;
+      updateScoreUI(score);
+    }
 
-  GameState.isCelebrating = true;
+    setIsCelebrating(true);
+  });
 }
 
 export function resetBallPhysics() {
-  GameState.isKicked = false;
-  GameState.isSlowMotion = false;
-  GameState.cinematicProgress = 0;
-  GameState.hasCinematicEnded = false;
-  GameState.cinematicEndTime = 0;
-  GameState.isCelebrating = false;
-
+  resetGameState();
   velocity.set(0, 0, 0);
   if (ball && player) resetBallPosition();
+}
+
+function checkCinematicEnd() {
+  if (!getHasCinematicEnded() && getCinematicProgress() >= 1) {
+    setCinematicEnded();
+  }
 }
 
 export function getScore() {

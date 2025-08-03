@@ -31,6 +31,7 @@ export function setupRenderer(canvas) {
 
 // === LIGHTING ===
 export function setupLighting() {
+  if (!scene) return console.warn("Scene belum di-setup sebelum lighting.");
   const dirLight = new THREE.DirectionalLight(0xffffff, 1);
   dirLight.position.set(10, 10, 10);
   scene.add(dirLight);
@@ -90,7 +91,6 @@ export function loadGoals() {
 export function createLabels() {
   labelA = createLabel("A", "#1900FF", -10);
   labelB = createLabel("B", "#FF0040", 10);
-  console.log("Label A & B created", labelA, labelB);
 }
 
 function createLabel(name, color, xPosition) {

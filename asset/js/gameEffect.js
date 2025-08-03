@@ -3,6 +3,7 @@ import { DEFAULT_CAMERA_POS } from './gameCore.js';
 export let scene, camera, renderer;
 
 export function setupScene(canvas) {
+  if (!canvas) throw new Error("Canvas tidak ditemukan!");
   scene = new THREE.Scene();
   setupCamera();
   setupRenderer(canvas);
@@ -11,19 +12,14 @@ export function setupScene(canvas) {
 }
 
 function setupCamera() {
-  camera = new THREE.PerspectiveCamera(
-    60,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-  );
+  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
   resetCamera();
 }
 
 export function resetCamera() {
   if (!camera) return;
   camera.position.copy(DEFAULT_CAMERA_POS);
-  camera.lookAt(new THREE.Vector3(0, 1.5, 0)); // Fokus ke tengah pemain
+  camera.lookAt(new THREE.Vector3(0, 1.5, 0));
 }
 
 function setupRenderer(canvas) {
@@ -46,3 +42,7 @@ export function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
+
+export function getScene() { return scene; }
+export function getCamera() { return camera; }
+export function getRenderer() { return renderer; }
