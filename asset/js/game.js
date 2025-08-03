@@ -264,25 +264,21 @@ function updateGameLogic() {
 
     // Delay 1 detik setelah cinematic selesai sebelum cek jawaban
     if (hasCinematicEnded && performance.now() - cinematicEndTime > 1000 && !isCelebrating) {
-      if (isAnswerChecked) {
-        const { isCorrect } = answerResult;
+      const { isCorrect } = answerResult;
 
-        toggleGameplayVisibility(false);
-        resetBallPhysics();
+      toggleGameplayVisibility(false);     // Sembunyikan elemen gameplay
+      resetBallPhysics();                  // Reset semua variabel bola
 
-        if (isCorrect) {
-          score++;
-          updateScoreUI();
-          showResultFeedback(true);
-        } else {
-          showResultFeedback(false);
-        }
+      showResultFeedback(isCorrect);       // Tampilkan feedback & confetti
 
-        // Reset
-        isAnswerChecked = false;
-        answerResult = null;
-        isCelebrating = true;
+      if (isCorrect) {
+        score++;
+        updateScoreUI();
       }
+
+      isAnswerChecked = false;
+      answerResult = null;
+      isCelebrating = true;
     }
   }
 }
