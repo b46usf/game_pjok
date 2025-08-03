@@ -22,6 +22,7 @@ let feedbackSprite = null;
 let isAnswerChecked = false;
 let hasCinematicEnded = false;
 let cinematicEndTime = 0;
+let answerResult = null;
 
 
 // === Questions Data ===
@@ -264,7 +265,7 @@ function updateGameLogic() {
     // Delay 1 detik setelah cinematic selesai sebelum cek jawaban
     if (hasCinematicEnded && performance.now() - cinematicEndTime > 1000 && !isCelebrating) {
       if (isAnswerChecked) {
-        const { isCorrect } = isAnswerChecked;
+        const { isCorrect } = answerResult;
 
         toggleGameplayVisibility(false);
         resetBallPhysics();
@@ -277,7 +278,9 @@ function updateGameLogic() {
           showResultFeedback(false);
         }
 
+        // Reset
         isAnswerChecked = false;
+        answerResult = null;
         isCelebrating = true;
       }
     }
@@ -308,9 +311,8 @@ function checkAnswerFromLabelHit(hitLabel) {
   const isCorrect = hitLabel === currentQuestion.correctLabel;
 
   // Simpan dulu hasilnya, nanti dieksekusi setelah animasi sinematik
-  isAnswerChecked = {
-    isCorrect: isCorrect
-  };
+  answerResult = { isCorrect };
+  isAnswerChecked = true;
 
   toggleGameplayVisibility(false);
   resetBallPhysics();
