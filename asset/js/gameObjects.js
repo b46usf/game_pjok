@@ -1,4 +1,4 @@
-import { DEFAULT_CAMERA_POS } from './gameCore.js';
+import { DEFAULT_CAMERA_POS, setLabels } from './gameCore.js';
 import { drawLabelToCanvas } from './gameUtils.js';
 
 // === GLOBAL OBJECTS ===
@@ -91,6 +91,7 @@ export function loadGoals() {
 export function createLabels() {
   labelA = createLabel("A", "#1900FF", -10);
   labelB = createLabel("B", "#FF0040", 10);
+  setLabels(labelA, labelB);
 }
 
 function createLabel(name, color, xPosition) {

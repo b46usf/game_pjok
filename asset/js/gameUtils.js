@@ -104,5 +104,6 @@ export function drawLabelToCanvas(ctx, text, bgColor) {
   ctx.fillStyle = "#fff";
   ctx.font = "bold 40px sans-serif";
   ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
   ctx.fillText(text, 64, 48);
 }
